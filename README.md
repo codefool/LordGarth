@@ -1,0 +1,2 @@
+# LordGarth
+Chess engine library
