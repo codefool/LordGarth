@@ -1,5 +1,7 @@
 #pragma once
 
+#include <map>
+#include <memory>
 #include <utility>
 #include <vector>
 
@@ -27,10 +29,10 @@ enum MoveAction {
 	MV_EN_PASSANT       = 5,
 	// MV_UNUSED = 6,
 	// MV_UNUSED = 7,
-	MV_PROMOTION_QUEEN  = 8,
-	MV_PROMOTION_BISHOP = 9,
-	MV_PROMOTION_KNIGHT = 10,
-	MV_PROMOTION_ROOK   = 11
+	MV_PROM_QUEEN       = 8,
+	MV_PROM_BISHOP      = 9,
+	MV_PROM_KNIGHT      = 10,
+	MV_PROM_ROOK        = 11
 	// UNUSED = 12
 	// UNUSED = 13
 	// UNUSED = 14
@@ -52,3 +54,10 @@ enum Dir {
 };
 
 typedef std::vector<Dir> DirList;
+
+class Square; // forward;
+
+class Piece; // forward
+typedef std::shared_ptr<Piece>    PiecePtr;
+typedef std::vector<PiecePtr>     PieceList;
+typedef std::map<Square,PiecePtr> PieceMap;

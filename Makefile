@@ -17,8 +17,8 @@ CFLAGS := -g -std=c++2a -I$(INC_DIR)
 ARC := ar
 AFLAGS := rvs
 
-garth : $(HDR) $(LIB_NAME)
-	$(CC) $(CFLAGS) -L/usr/lib/x86_64-linux-gnu $(LIB_NAME) -o $@
+garth : garth.cpp garth.h $(HDR) $(LIB_NAME)
+	$(CC) $(CFLAGS) garth.cpp -L/usr/lib/x86_64-linux-gnu $(LIB_NAME) -o $@
 
 $(LIB_NAME) : $(OBJ)
 	$(ARC) $(AFLAGS) $@ $(OBJ)

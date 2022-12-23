@@ -31,7 +31,32 @@ public:
     bool is_empty(Square squ);
     PiecePtr set( Rank r, File f, PieceType pt, Side s );
     PiecePtr set( Square squ, PieceType pt, Side s );
-    PieceList get_side( Side s );
+    Side get_on_move() const;
+    void set_on_move(Side s);
+    void toggle_on_move();
+    bool get_castle_white_queenside() const;
+    void set_castle_white_queenside(bool state);
+    bool get_castle_white_kingside() const;
+    void set_castle_white_kingside(bool state);
+    bool get_castle_black_queenside() const;
+    void set_castle_black_queenside(bool state);
+    bool get_castle_black_kingside() const;
+    void set_castle_black_kingside(bool state);
+    bool has_en_passant() const;
+    void clear_en_passant();
+    Square get_en_passant() const;
+    void set_en_passant(Square eps);
+    short get_half_move_clock() const;
+    void set_half_move_clock(short cnt);
+    short inc_half_move_clock();
+    void reset_half_move_clock();
+    short get_full_move_cnt() const;
+    void set_full_move_cnt(short cnt);
+    short inc_full_move_cnt();
+    void clear_full_move_cnt();
+
+
+    PieceList get_side_pieces( Side s );
     void set_initial_position();
     MoveList& get_moves(MoveList& moves);
     std::string diagram();
@@ -64,6 +89,5 @@ public:
     std::string fen();
 public:
     static PiecePtr EMPTY;
-    static std::vector<MoveRulePtr> move_rule_list;
     static const char *init_pos_fen;
 };

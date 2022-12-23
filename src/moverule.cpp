@@ -1,15 +1,11 @@
 #include "moverule.h"
 #include "board.h"
 
-bool AxesMoveRule::applies(PieceType pt) { 
-    return pt == PT_KING || pt == PT_QUEEN || pt == PT_ROOK; 
-}
+DirList AxesMoveRule::dirs{UP, DN, LFT, RGT};
 
 void AxesMoveRule::get_moves( Board* b, PiecePtr pt, MoveList& moves) {
     b->gather_moves(pt, dirs, moves);
 }
-
-DirList AxesMoveRule::dirs{UP, DN, LFT, RGT};
 
 bool AxesMoveRule::can_attack( Board *b, PiecePtr src, PiecePtr trg ) {
     // to attack on the axes, either the rank or file must be equal.
@@ -31,9 +27,7 @@ bool AxesMoveRule::can_attack( Board *b, PiecePtr src, PiecePtr trg ) {
 }
 
 
-bool DiagMoveRule::applies(PieceType pt) { 
-    return pt == PT_KING || pt == PT_QUEEN || pt == PT_BISHOP; 
-}
+DirList DiagMoveRule::dirs{UPL, UPR, DNL, DNR};
 
 void DiagMoveRule::get_moves( Board *b, PiecePtr pt, MoveList& moves) {
     b->gather_moves(pt, dirs, moves);
@@ -59,13 +53,9 @@ bool DiagMoveRule::can_attack( Board *b, PiecePtr src, PiecePtr trg ) {
     return b->seek(src, dir, trg).rc == Board::SEEKRC_TARGET_FOUND;
 }
 
-DirList DiagMoveRule::dirs{UPL, UPR, DNL, DNR};
 
 
-
-bool KnightMoveRule::applies(PieceType pt) { 
-    return pt == PT_KNIGHT; 
-}
+DirList KnightMoveRule::dirs{ KLUP, KUPL, KUPR, KRUP, KRDN, KDNR, KDNL, KLDN };
 
 void KnightMoveRule::get_moves( Board *b, PiecePtr pt, MoveList& moves) {
     Square org(pt->square());
@@ -98,13 +88,9 @@ bool KnightMoveRule::can_attack( Board *b, PiecePtr src, PiecePtr trg ) {
     return false;
 }
 
-DirList KnightMoveRule::dirs{ KLUP, KUPL, KUPR, KRUP, KRDN, KDNR, KDNL, KLDN };
 
-
-
-bool PawnMoveRule::applies(PieceType pt) { 
-    return pt == PT_PAWN || pt == PT_PAWN_OFF; 
-}
+DirList PawnMoveRule::on_black{DNL,DNR};
+DirList PawnMoveRule::on_white{UPL,UPR};
 
 void PawnMoveRule::get_moves( Board *b, PiecePtr pt, MoveList& moves) {
     // pawns are filthy animals ...
@@ -125,13 +111,13 @@ void PawnMoveRule::get_moves( Board *b, PiecePtr pt, MoveList& moves) {
     Rank   pnhm    = (isBlack)?R7:R2;
     Square pos     = ppos + offs[updn];
     if( pos.in_bounds() && b->is_empty(pos) ) {
-        // pawn can move forward
+        // Case 1: pawn can move forward
         if ( (isBlack && pos.rank() == R1) || (pos.rank() == R8) ) {
             // Case 5. A pawn reaching its eighth rank is promoted
             //
             // As we're collecting all possible moves, record four
             // promotions.
-            for( auto action : {MV_PROMOTION_QUEEN, MV_PROMOTION_BISHOP, MV_PROMOTION_KNIGHT, MV_PROMOTION_ROOK})
+            for( auto action : {MV_PROM_QUEEN, MV_PROM_BISHOP, MV_PROM_KNIGHT, MV_PROM_ROOK})
                 moves.push_back(Move::create(action, MR_NONE, ppos, pos));
         } else {
             moves.push_back(Move::create(MV_MOVE, MR_NONE, ppos, pos));
@@ -143,10 +129,12 @@ void PawnMoveRule::get_moves( Board *b, PiecePtr pt, MoveList& moves) {
                 moves.push_back(Move::create(MV_MOVE, MR_NONE, ppos, pos));
         }
     }
+
     // Case 3: Pawns may capture directly to the UPL or UPR.
     // see if an opposing piece is UPL or UPR
     DirList *dirs = (isBlack) ? &on_black : &on_white;
     b->gather_moves( pt, *dirs, moves, true );
+
     // Case 4. A pawn on its own fifth rank may capture a neighboring pawn en passant moving
     // UPL or UPR iif the target pawn moved forward two squares on its last on-move.
 
@@ -154,21 +142,21 @@ void PawnMoveRule::get_moves( Board *b, PiecePtr pt, MoveList& moves) {
     // AND the pawn has not moved off its own rank (is not of type PT_PAWN_OFF)
     // AND pawn is on its fifth rank.
     // AND if target pawn is adjacent to this pawn
-    // if ( pt->type() == PT_PAWN && _p.gi().hasEnPassant() ) {
-    //     // an en passant candidate exists
-    //     Rank r_pawn = (isBlack) ? R4 : R5;      // rank where the pawn is
-    //     Rank r_move = (isBlack) ? R3 : R6;      // rank with  the space where our pawn moves
-    //     // the en passant file is the file that contains the subject pawn
-    //     // if our pawn is one square away (left or right) from the en passant file
-    //     // then we *can* capture that pawn.
-    //     if( ppos.rank() == r_pawn && abs( ppos.f() - _p.gi().getEnPassantFile()) == 1 ) {
-    //         // If so, check if the space above the target pawn is empty.
-    //         // If so, then en passant is possible.
-    //         Square epos( r_move, _p.gi().getEnPassantFile() ); // pos of target square
-    //         if ( _p.is_square_empty(epos) )
-    //             moves.push_back( Move::create( MV_EN_PASSANT, MR_NONE, ppos, epos ) );
-    //     }
-    // }
+    if ( pt->type() == PT_PAWN && b->has_en_passant() ) {
+        // an en passant candidate exists
+        Rank r_pawn = (isBlack) ? R4 : R5;      // rank where the pawn is
+        Rank r_move = (isBlack) ? R3 : R6;      // rank with  the space where our pawn moves
+        // the en passant file is the file that contains the subject pawn
+        // if our pawn is one square away (left or right) from the en passant file
+        // then we *can* capture that pawn.
+        if( ppos.rank() == r_pawn && std::abs(ppos.file() - b->get_en_passant().file()) == 1 ) {
+            // If so, check if the space above the target pawn is empty.
+            // If so, then en passant is possible.
+            Square epos( r_move, b->get_en_passant().file() ); // pos of target square
+            if ( b->is_empty(epos) )
+                moves.push_back( Move::create( MV_EN_PASSANT, MR_NONE, ppos, epos ) );
+        }
+    }
 }
 
 bool PawnMoveRule::can_attack( Board *b, PiecePtr src, PiecePtr trg ) {
@@ -192,14 +180,23 @@ bool PawnMoveRule::can_attack( Board *b, PiecePtr src, PiecePtr trg ) {
     return false;
 }
 
-DirList PawnMoveRule::on_black{DNL,DNR};
-DirList PawnMoveRule::on_white{UPL,UPR};
-
-
-bool CastleMoveRule::applies(PieceType pt) { 
-    return pt == PT_KING;
-}
 
 void CastleMoveRule::get_moves( Board *b, PiecePtr pt, MoveList& moves) {
 }
 
+std::map<MoveRuleOrd, MoveRulePtr> move_rules{
+    { MVRULE_AXES,   std::make_shared<AxesMoveRule>()   },
+    { MVRULE_DIAG,   std::make_shared<DiagMoveRule>()   },
+    { MVRULE_KNIGHT, std::make_shared<KnightMoveRule>() },
+    { MVRULE_PAWN,   std::make_shared<PawnMoveRule>()   },
+    { MVRULE_CASTLE, std::make_shared<CastleMoveRule>() }
+};
+
+std::map<PieceType, MoveRuleOrdList> piece_move_rules{
+    { PT_KING  , MoveRuleOrdList{MVRULE_AXES, MVRULE_DIAG, MVRULE_CASTLE} },
+    { PT_QUEEN , MoveRuleOrdList{MVRULE_AXES, MVRULE_DIAG               } },
+    { PT_BISHOP, MoveRuleOrdList{             MVRULE_DIAG               } },
+    { PT_KNIGHT, MoveRuleOrdList{                          MVRULE_KNIGHT} },
+    { PT_ROOK  , MoveRuleOrdList{MVRULE_AXES                            } },
+    { PT_PAWN  , MoveRuleOrdList{                          MVRULE_PAWN  } }
+};
