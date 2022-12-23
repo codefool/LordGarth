@@ -26,7 +26,7 @@ bool AxesMoveRule::can_attack( Board *b, PiecePtr src, PiecePtr trg ) {
     // +  down  right
     // -  up    left
     Dir dir = ( dr == 0 ) ? ( df < 0 ) ? LFT : RGT
-                            : ( dr < 0 ) ? DN  : UP;
+                          : ( dr < 0 ) ? DN  : UP;
     return b->seek(src, dir, trg).rc == Board::SEEKRC_TARGET_FOUND;
 }
 

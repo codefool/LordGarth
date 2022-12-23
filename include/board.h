@@ -5,6 +5,7 @@ class Board; // forward
 #include "constants.h"
 #include "piece.h"
 #include "moverule.h"
+#include "util.h"
 
 class Board {
 private:
