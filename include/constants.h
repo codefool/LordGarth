@@ -8,6 +8,12 @@
 enum Side { SIDE_WHITE=0, SIDE_BLACK };
 enum Rank { R1=0, R2, R3, R4, R5, R6, R7, R8 };
 enum File { Fa=0, Fb, Fc, Fd, Fe, Ff, Fg, Fh };
+
+#define PAWN_RANK_BLACK R7
+#define PAWN_RANK_WHITE R2
+#define EN_PASSANT_RANK_WHITE R5
+#define EN_PASSANT_RANK_BLACK R4
+
 enum PieceType {
     PT_EMPTY = 0,
     PT_KING,

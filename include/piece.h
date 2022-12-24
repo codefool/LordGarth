@@ -26,6 +26,8 @@ public:
     const bool      is_empty() const;
 
     void place( Square& squ );
+    void promote(PieceType pt);
+    void set_glyph();
 
     bool operator==(const Piece& rhs);
 private:

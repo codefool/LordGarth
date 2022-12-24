@@ -20,12 +20,12 @@ const Offset offs[] = {
     {-1,-2}   // KLDN
 };
 
-Move::Move(MoveAction ma, MoveResult mr, Square org, Square trg )
-: action(ma), result(mr), org(org), trg(trg)
+Move::Move(MoveAction ma, MoveResult mr, Square org, Square dst )
+: action(ma), result(mr), org(org), dst(dst)
 {}
 
-MovePtr Move::create(MoveAction ma, MoveResult mr, Square org, Square trg ) {
-    return std::make_shared<Move>(ma, mr, org, trg);
+MovePtr Move::create(MoveAction ma, MoveResult mr, Square org, Square dst ) {
+    return std::make_shared<Move>(ma, mr, org, dst);
 }
 
 std::ostream& operator<<(std::ostream& os, const Move& mv) {
@@ -50,7 +50,7 @@ std::ostream& operator<<(std::ostream& os, const Move& mv) {
         case MR_DOUBLE_CHECK: os << "MR_DOUBLE_CHECK"; break;  
     }
 
-    os << ' ' << mv.org << "-->" << mv.trg;
+    os << ' ' << mv.org << "-->" << mv.dst;
 
     return os;
 }

@@ -29,8 +29,10 @@ public:
     PiecePtr at( Square squ );
     bool is_empty(Rank r, File f);
     bool is_empty(Square squ);
+    void clear_square(Square squ);
     PiecePtr set( Rank r, File f, PieceType pt, Side s );
     PiecePtr set( Square squ, PieceType pt, Side s );
+    void place( PiecePtr p, Square squ);
     Side get_on_move() const;
     void set_on_move(Side s);
     void toggle_on_move();
@@ -59,6 +61,8 @@ public:
     PieceList get_side_pieces( Side s );
     void set_initial_position();
     MoveList& get_moves(MoveList& moves);
+    void apply_move(Move& mov, Board& cpy);
+    void move_piece(PiecePtr ptr, Square dst);
     std::string diagram();
     void gather_moves( PiecePtr pp, DirList dirs, MoveList& moves, bool isPawnCapture = false);
     MovePtr check_square(PiecePtr pp, Square trg, bool isPawnCapture = false);

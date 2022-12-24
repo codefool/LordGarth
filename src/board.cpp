@@ -43,11 +43,9 @@ bool Board::is_empty(Square squ) {
     return at(squ) == EMPTY;
 }
 
-// set("a1", PT_KING, SIDE_WHITE);
-// PiecePtr set( std::string fr, PieceType pt, Side s)
-// {
-//     return set(Square(fr), pt, s);
-// }
+void Board::clear_square(Square squ) { 
+    _pm.erase(squ);
+}
 
 PiecePtr Board::set( Rank r, File f, PieceType pt, Side s ) {
     return set( Square(r,f), pt, s );
@@ -55,12 +53,16 @@ PiecePtr Board::set( Rank r, File f, PieceType pt, Side s ) {
 
 PiecePtr Board::set( Square squ, PieceType pt, Side s ) {
     PiecePtr pp = std::make_shared<Piece>(pt, s);
+    place( pp, squ );
+    return pp;
+}
+
+void Board::place( PiecePtr pp, Square squ) {
     pp->place(squ);
     _pm[squ] = pp;
     // remember where the kings are
-    if (pt == PT_KING)
-        _kings[s] = pp;
-    return pp;
+    if ( pp->type() == PT_KING )
+        _kings[ pp->side() ] = pp;
 }
 
 Side Board::get_on_move() const {

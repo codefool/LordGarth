@@ -3,9 +3,7 @@
 Piece::Piece(PieceType t, Side s)
 : _t(t), _s(s)
 {
-    _g = glyphs[_t];
-    if ( is_black() ) 
-        _g = std::tolower(_g);
+    set_glyph();
 }
 
 const PieceType Piece::type() const { return _t; }
@@ -19,6 +17,17 @@ const bool      Piece::is_black() const { return _s == SIDE_BLACK; }
 const bool      Piece::is_empty() const { return _t == PT_EMPTY; }
 
 void Piece::place( Square& squ ) { _q = squ; }
+
+void Piece::promote( PieceType pt ) { 
+    _t = pt; 
+    set_glyph();
+}
+
+void Piece::set_glyph() {
+    _g = glyphs[_t];
+    if ( is_black() ) 
+        _g = std::tolower(_g);
+}
 
 bool Piece::operator==(const Piece& rhs) {
     return _t == rhs._t

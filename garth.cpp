@@ -33,12 +33,16 @@ int main() {
     //     std::cout << *move << std::endl;
 
     // Board b("rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1");
-    Board b;
-    MoveList ml;
-    b.get_moves(ml);
-    for ( MovePtr m : ml )
-        std::cout << *m << ' ' << std::endl;
-    std::cout << b.fen() << std::endl;
-    std::cout << b.diagram() << std::endl;
+    std::string fen;
+    while( std::getline(std::cin, fen)) {
+        std::cout << fen << std::endl;
+        Board b(fen);
+        MoveList ml;
+        b.get_moves(ml);
+        for ( MovePtr m : ml )
+            std::cout << *m << ' ' << std::endl;
+        std::cout << b.fen() << std::endl;
+        std::cout << b.diagram() << std::endl;
+    }
     return 0;
 }
