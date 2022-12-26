@@ -9,9 +9,6 @@
 
 extern const Offset offs[];
 
-struct Move;    // forward decl
-typedef std::shared_ptr<Move> MovePtr;
-
 struct Move {
     MoveAction action;
     MoveResult result;
@@ -23,5 +20,3 @@ struct Move {
     friend std::ostream& operator<<(std::ostream& os, const Move& mv);
 };
 
-typedef std::shared_ptr<Move> MovePtr;
-typedef std::vector<MovePtr>  MoveList;

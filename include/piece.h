@@ -35,6 +35,3 @@ private:
     static const short ranges[];
 };
 
-typedef std::shared_ptr<Piece>    PiecePtr;
-typedef std::vector<PiecePtr>     PieceList;
-typedef std::map<Square,PiecePtr> PieceMap;

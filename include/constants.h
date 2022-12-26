@@ -51,6 +51,22 @@ enum MoveResult {
     MR_DOUBLE_CHECK
 };
 
+enum MoveRuleOrd {
+    MVRULE_AXES   = 0x01,
+    MVRULE_DIAG   = 0x02,
+    MVRULE_KNIGHT = 0x04,
+    MVRULE_PAWN   = 0x08,
+    MVRULE_CASTLE = 0x10
+};
+
+typedef std::vector<MoveRuleOrd>  MoveRuleOrdList;
+
+enum IllegalMoveReason {
+    MOVE_INTO_CHECK,            // king cannot move into check
+    KING_IN_CHECK,              // move does not take king out of check
+    PUTS_KING_IN_CHECK          // move puts king in check
+};
+
 //                rank  file
 typedef std::pair<short,short>    Offset;
 
@@ -61,7 +77,26 @@ enum Dir {
 
 typedef std::vector<Dir> DirList;
 
+class Board;  // forward
+
 class Square; // forward;
+typedef std::vector<Square> SquareList;
+
+class Piece; // forward
+
+typedef std::shared_ptr<Piece>    PiecePtr;
+typedef std::vector<PiecePtr>     PieceList;
+typedef std::map<Square,PiecePtr> PieceMap;
+
+struct Move; // forward
+
+typedef std::shared_ptr<Move> MovePtr;
+typedef std::vector<MovePtr>  MoveList;
+
+class MoveRule; // forward
+
+typedef std::shared_ptr<MoveRule> MoveRulePtr;
+typedef std::vector<MoveRulePtr>  MoveRuleList;
 
 class Piece; // forward
 typedef std::shared_ptr<Piece>    PiecePtr;

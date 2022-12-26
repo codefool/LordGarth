@@ -26,4 +26,3 @@ struct Square : public std::pair<short,short>
     static Square UNBOUNDED;
 };
 
-typedef std::vector<Square> SquareList;
