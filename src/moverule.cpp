@@ -6,21 +6,9 @@ void AxesMoveRule::get_moves( Board* b, PiecePtr pt, MoveList& moves) {
 }
 
 bool AxesMoveRule::can_attack( Board *b, PiecePtr src, PiecePtr trg ) {
-    // to attack on the axes, either the rank or file must be equal.
-    Square org(src->square());
-    Square dst(trg->square());
-    short dr = org.rank() - dst.rank();
-    short df = org.file() - dst.file();
-
-    if ( dr != 0 && df != 0 )
+    const Dir dir = src->square().axes_bearing(trg->square());
+    if ( dir == NOWHERE )
         return false;
-
-    // target is orthogonal to source, figure out which side 
-    //     dr    df
-    // +  down  right
-    // -  up    left
-    Dir dir = ( dr == 0 ) ? ( df < 0 ) ? LFT : RGT
-                          : ( dr < 0 ) ? DN  : UP;
     return b->seek(src, dir, trg).rc == Board::SEEKRC_TARGET_FOUND;
 }
 
@@ -29,25 +17,9 @@ void DiagMoveRule::get_moves( Board *b, PiecePtr pt, MoveList& moves) {
 }
 
 bool DiagMoveRule::can_attack( Board *b, PiecePtr src, PiecePtr trg ) {
-    // To attack on the diagnonal, the dr/df of the src/trg must be equal.
-    // Square org(src->square());
-    // Square dst(src->square());
-    // short dr = org.rank() - dst.rank();
-    // short df = org.file() - dst.file();
-    // if ( std::abs(dr) != std::abs(df) )
-    //     return false;
-
-    // trg is on the same diagonal, so now determine if there is anything 
-    // between src and trg. Be a little smart, as the signs of dr/df will
-    // tell the direction to seek
-    //     dr    df
-    // +  down  right
-    // -  up    left
     const Dir dir = src->square().axes_bearing(trg->square());
     if ( dir == NOWHERE )
         return false;
-    // Dir dir = (dr < 0) ? (df < 0) ? DNL : DNR 
-    //                    : (df < 0) ? UPL : UPR;         
     return b->seek(src, dir, trg).rc == Board::SEEKRC_TARGET_FOUND;
 }
 
