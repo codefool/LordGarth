@@ -26,6 +26,11 @@ Square::Square(const char *fr) {
     second = (File)( f - 'a' );
 }
 
+Square::Square(RnF rnf) {
+    first  = (rnf >> 3);
+    second = (rnf &0x07);
+}
+
 Rank Square::rank() const { return (Rank)first; }
 File Square::file() const { return (File)second; }
 

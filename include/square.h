@@ -13,6 +13,8 @@ struct Square : public std::pair<short,short>
     Square(short r, short f);
     Square(std::string fr);
     Square(const char *fr);
+    Square(RnF rnf);
+
     Rank rank() const;
     File file() const;
 

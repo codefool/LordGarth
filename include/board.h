@@ -24,12 +24,13 @@ public:
     Board(const char *fen);
     Board(std::string fen);
     int piece_cnt();
-    PiecePtr at( Rank r, File f );
-    PiecePtr at( Square squ );
-    bool is_empty(Rank r, File f);
-    bool is_empty(Square squ);
+    PiecePtr at( Rank r, File f ) const;
+    PiecePtr at( Square squ ) const;
+    bool is_empty(Rank r, File f) const;
+    bool is_empty(Square squ) const;
     void clear_square(Square squ);
     PiecePtr set( Rank r, File f, PieceType pt, Side s );
+    PiecePtr set( RnF rnf, PieceType pt, Side s );
     PiecePtr set( Square squ, PieceType pt, Side s );
     void place( PiecePtr p, Square squ);
     Side get_on_move() const;
@@ -57,17 +58,18 @@ public:
     void clear_full_move_cnt();
 
 
-    PieceList get_side_pieces( Side s );
+    PieceList get_side_pieces( Side s ) const;
     void set_initial_position();
-    MoveList& get_moves(MoveList& moves);
-    void get_pawn_moves( PiecePtr ptr, MoveList& moves);
+    MoveList& get_moves(MoveList& moves) const;
+    void get_pawn_moves( PiecePtr ptr, MoveList& moves) const;
     void apply_move(Move& mov, Board& cpy);
     void move_piece(PiecePtr ptr, Square dst);
-    std::string diagram();
-    void gather_moves( PiecePtr pp, DirList dirs, MoveList& moves, bool isPawnCapture = false);
-    MovePtr check_square(PiecePtr pp, Square trg, bool isPawnCapture = false);
+    std::string diagram() const;
+    void gather_moves( PiecePtr pp, DirList dirs, MoveList& moves, bool isPawnCapture = false) const;
+    MovePtr check_square(PiecePtr pp, Square trg, bool isPawnCapture = false) const;
 
-    short test_for_check(Side s);
+    short test_for_attack(PiecePtr trg) const;
+    short test_for_check(Side s) const;
 
     enum SeekResultCode {
         SEEKRC_NONE,            
@@ -88,8 +90,8 @@ public:
         SeekResultCode rc; 
     };
 
-    SeekResult seek( PiecePtr src, Dir dir, PiecePtr trg );
-    SeekResult seek( PiecePtr src, Dir dir, Square dst );
+    SeekResult seek( PiecePtr src, Dir dir, PiecePtr trg ) const;
+    SeekResult seek( PiecePtr src, Dir dir, Square dst ) const;
 
     void from_fen(const std::string& fen);
     std::string fen();

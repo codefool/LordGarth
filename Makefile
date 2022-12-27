@@ -31,5 +31,5 @@ clean:
 
 .PHONY:
 
-test:
-	$(CC) $(CFLAGS) ./test/dstack_test.cpp -I. -L/usr/lib/x86_64-linux-gnu $(LIB_NAME) -o dstack_test
+# test:
+# 	$(CC) $(CFLAGS) ./test/dstack_test.cpp -I. -L/usr/lib/x86_64-linux-gnu $(LIB_NAME) -o dstack_test

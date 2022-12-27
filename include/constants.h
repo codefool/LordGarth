@@ -12,6 +12,25 @@ enum Side { SIDE_WHITE=0, SIDE_BLACK };
 enum Rank { R1=0, R2, R3, R4, R5, R6, R7, R8 };
 enum File { Fa=0, Fb, Fc, Fd, Fe, Ff, Fg, Fh };
 
+enum RnF : unsigned short {
+    a1 = (R1<<3) | Fa, a2 = (R1<<3) | Fb, a3 = (R1<<3) | Fc, a4 = (R1<<3) | Fd, 
+    a5 = (R1<<3) | Fe, a6 = (R1<<3) | Ff, a7 = (R1<<3) | Fg, a8 = (R1<<3) | Fh,
+    b1 = (R2<<3) | Fa, b2 = (R2<<3) | Fb, b3 = (R2<<3) | Fc, b4 = (R2<<3) | Fd, 
+    b5 = (R2<<3) | Fe, b6 = (R2<<3) | Ff, b7 = (R2<<3) | Fg, b8 = (R2<<3) | Fh,
+    c1 = (R3<<3) | Fa, c2 = (R3<<3) | Fb, c3 = (R3<<3) | Fc, c4 = (R3<<3) | Fd, 
+    c5 = (R3<<3) | Fe, c6 = (R3<<3) | Ff, c7 = (R3<<3) | Fg, c8 = (R3<<3) | Fh,
+    d1 = (R4<<3) | Fa, d2 = (R4<<3) | Fb, d3 = (R4<<3) | Fc, d4 = (R4<<3) | Fd, 
+    d5 = (R4<<3) | Fe, d6 = (R4<<3) | Ff, d7 = (R4<<3) | Fg, d8 = (R4<<3) | Fh,
+    e1 = (R5<<3) | Fa, e2 = (R5<<3) | Fb, e3 = (R5<<3) | Fc, e4 = (R5<<3) | Fd, 
+    e5 = (R5<<3) | Fe, e6 = (R5<<3) | Ff, e7 = (R5<<3) | Fg, e8 = (R5<<3) | Fh,
+    f1 = (R6<<3) | Fa, f2 = (R6<<3) | Fb, f3 = (R6<<3) | Fc, f4 = (R6<<3) | Fd, 
+    f5 = (R6<<3) | Fe, f6 = (R6<<3) | Ff, f7 = (R6<<3) | Fg, f8 = (R6<<3) | Fh,
+    g1 = (R7<<3) | Fa, g2 = (R7<<3) | Fb, g3 = (R7<<3) | Fc, g4 = (R7<<3) | Fd, 
+    g5 = (R7<<3) | Fe, g6 = (R7<<3) | Ff, g7 = (R7<<3) | Fg, g8 = (R7<<3) | Fh,
+    h1 = (R8<<3) | Fa, h2 = (R8<<3) | Fb, h3 = (R8<<3) | Fc, h4 = (R8<<3) | Fd, 
+    h5 = (R8<<3) | Fe, h6 = (R8<<3) | Ff, h7 = (R8<<3) | Fg, h8 = (R8<<3) | Fh
+};
+
 #define PAWN_RANK_BLACK R7
 #define PAWN_RANK_WHITE R2
 #define EN_PASSANT_RANK_WHITE R5
@@ -28,7 +47,7 @@ enum PieceType {
     PT_PAWN_OFF
 };
 
-// the MoveAction is packed to 4 bits, so 0..15
+// the MoveAction is pbcked to 4 bits, so 0..15
 enum MoveAction {
 	MV_NONE             = 0,
 	MV_MOVE             = 1,

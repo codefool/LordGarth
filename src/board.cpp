@@ -26,22 +26,22 @@ Board::Board(std::string fen) {
 
 int Board::piece_cnt() { return _pm.size(); }
 
-PiecePtr Board::at( Rank r, File f ) {
+PiecePtr Board::at( Rank r, File f ) const {
     return at( Square(r,f) );
 }
 
-PiecePtr Board::at( Square squ ) {
+PiecePtr Board::at( Square squ ) const {
     auto itr = _pm.find( squ );
     if ( itr != _pm.end() )
         return itr->second;       
     return EMPTY;
 }
 
-bool Board::is_empty(Rank r, File f) {
+bool Board::is_empty(Rank r, File f) const {
     return is_empty(Square(r,f));
 }
 
-bool Board::is_empty(Square squ) {
+bool Board::is_empty(Square squ) const {
     return at(squ) == EMPTY;
 }
 
@@ -51,6 +51,10 @@ void Board::clear_square(Square squ) {
 
 PiecePtr Board::set( Rank r, File f, PieceType pt, Side s ) {
     return set( Square(r,f), pt, s );
+}
+
+PiecePtr Board::set( RnF rnf, PieceType pt, Side s ) {
+    return set( Square(rnf), pt, s );
 }
 
 PiecePtr Board::set( Square squ, PieceType pt, Side s ) {
@@ -162,7 +166,7 @@ void Board::set_castle_black_kingside(bool state) {
 }
 
 
-PieceList Board::get_side_pieces( Side s ) {
+PieceList Board::get_side_pieces( Side s ) const {
     PieceList ret;
     for ( auto pp : _pm ) {
         if ( pp.second->side() == s )
@@ -175,7 +179,7 @@ void Board::set_initial_position() {
     from_fen(init_pos_fen);
 }
 
-MoveList& Board::get_moves(MoveList& moves) {
+MoveList& Board::get_moves(MoveList& moves) const {
     for ( auto pp : _pm ) {
         PiecePtr ptr( pp.second );
         if ( ptr->moves_axes() ) {
@@ -208,7 +212,7 @@ MoveList& Board::get_moves(MoveList& moves) {
     return moves;
 }
 
-void Board::get_pawn_moves( PiecePtr ptr, MoveList& moves ) {
+void Board::get_pawn_moves( PiecePtr ptr, MoveList& moves ) const {
     // pawns are filthy animals ...
     //
     // 1. Pawns can only move one square forward.
@@ -276,19 +280,21 @@ void Board::get_pawn_moves( PiecePtr ptr, MoveList& moves ) {
     }
 }
 
-std::string Board::diagram() {
+std::string Board::diagram() const {
     std::stringstream ss;
     for ( short r = R8; r >= R1; --r ) {
+        ss << char('a' + r) << ": ";
         for( short f = Fa; f <= Fh; ++f ) {
             PiecePtr pt = at((Rank)r,(File)f);
             ss << pt->glyph() << ' ';
         }
         ss << std::endl;
     }
+    ss << "   1 2 3 4 5 6 7 8" << std::endl;
     return ss.str();
 }
 
-void Board::gather_moves( PiecePtr pp, DirList dirs, MoveList& moves, bool isPawnCapture ) {
+void Board::gather_moves( PiecePtr pp, DirList dirs, MoveList& moves, bool isPawnCapture ) const {
     for (auto d : dirs) {
         Square pos = pp->square();
         Offset o = offs[d];
@@ -307,28 +313,28 @@ void Board::gather_moves( PiecePtr pp, DirList dirs, MoveList& moves, bool isPaw
     }
 }
 
-MovePtr Board::check_square(PiecePtr pp, Square trg, bool isPawnCapture ) {
-    PiecePtr other = at(trg);
+MovePtr Board::check_square(PiecePtr pp, Square dst, bool isPawnCapture ) const {
+    PiecePtr trg = at(dst);
     Square   org = pp->square();
 
-    if ( other->is_empty() ) {
+    if ( trg->is_empty() ) {
         // empty square so record move and continue
         // for isPawnCapture, the move is only valid if the space
         // is occupied by an opposing piece. So, if it's empty
         // return nullptr. Otherwise return the move.
         return (isPawnCapture) ? nullptr
-                                : Move::create(MV_MOVE, MR_NONE, org, trg);
+                               : Move::create(MV_MOVE, MR_NONE, org, dst);
     }
 
-    if( other->side() == pp->side()) {
+    if( trg->side() == pp->side()) {
         // If friendly piece, do not record move and leave.
         return nullptr;
     }
 
-    return Move::create(MV_CAPTURE, MR_NONE, org, trg);
+    return Move::create(MV_CAPTURE, MR_NONE, org, dst);
 }
 
-Board::SeekResult Board::seek( PiecePtr src, Dir dir, PiecePtr trg ) {
+Board::SeekResult Board::seek( PiecePtr src, Dir dir, PiecePtr trg ) const {
     SeekResult res = seek(src, dir, trg->square() );
     if ( res.rc == SEEKRC_FOUND_FRIENDLY || res.rc == SEEKRC_FOUND_OPPONENT )
         if ( res.enc == trg )
@@ -336,7 +342,7 @@ Board::SeekResult Board::seek( PiecePtr src, Dir dir, PiecePtr trg ) {
     return res;
 }
 
-Board::SeekResult Board::seek( PiecePtr src, Dir dir, Square dst ) {
+Board::SeekResult Board::seek( PiecePtr src, Dir dir, Square dst ) const {
     SeekResult res;
     res.src   = src->square();
     res.trg   = dst;
@@ -376,37 +382,38 @@ PiecePtr Board::EMPTY = std::make_shared<Piece>(PT_EMPTY, SIDE_WHITE);
 const char *Board::init_pos_fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 0";
 
 
-short Board::test_for_check(Side s) {
-    PiecePtr   king(_kings[s]);
-    Square     trg(king->square());
-    PieceList  att(get_side_pieces(OTHER_SIDE(s)));
+short Board::test_for_attack(PiecePtr trg) const {
+    Square     dst(trg->square());
+    PieceList  att(get_side_pieces(OTHER_SIDE(trg->side())));
     short      cnt(0);
     SeekResult res;
     Dir        dir;
     for ( PiecePtr attacker : att ) {
         Square src = attacker->square();
-        if ( attacker->moves_diag() && (dir = src.diag_bearing(trg)) != NOWHERE ) { 
+        if ( attacker->moves_diag() && (dir = src.diag_bearing(dst)) != NOWHERE ) { 
             res = seek( attacker, dir, trg );
-            if ( res.enc == king )
+            if ( res.enc == trg )
                 cnt++;                     
         }
-        if ( attacker->moves_axes() && ( dir = src.axes_bearing(trg) ) != NOWHERE ) {
+        if ( attacker->moves_axes() && ( dir = src.axes_bearing(dst) ) != NOWHERE ) {
             res = seek( attacker, dir, trg );
-            if ( res.enc == king )
+            if ( res.enc == trg )
                 cnt++;                     
         }
         if ( attacker->moves_knight() ) {
             for ( Dir dir : knight_moves ) {
-                if ( attacker->square() + offs[dir] == trg ) {
+                if ( attacker->square() + offs[dir] == dst ) {
                     cnt++;
                     break;
                 }
             }
+            // since knight cannot move like anything else, we're dong for this cycle
+            continue;   
         }
         if ( attacker->moves_pawn() ) {
-            const DirList *dirs = ( s == SIDE_WHITE ) ? &black_pawn_attack : &white_pawn_attack;
+            const DirList *dirs = ( trg->side() == SIDE_WHITE ) ? &black_pawn_attack : &white_pawn_attack;
             for ( Dir dir : *dirs ) {
-                if ( attacker->square() + offs[dir] == trg ) {
+                if ( attacker->square() + offs[dir] == dst ) {
                     cnt++;
                     break;
                 }
@@ -416,3 +423,8 @@ short Board::test_for_check(Side s) {
 
     return cnt;
 }
+
+short Board::test_for_check(Side s) const {
+    return test_for_attack(_kings[s]);
+}
+

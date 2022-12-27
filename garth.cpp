@@ -3,16 +3,19 @@
 #include "garth.h"
 
 int main(int argc, char **argv) {
-    // Board b(false);
-    // MoveList ml;
+    Board b(false);
+    MoveList ml;
     // b.get_moves(ml);
     // std::cout << b.diagram() << ' ' << ml.size() << std::endl;
     // for (auto m : ml)
     //     std::cout << *m << std::endl;
 
-    // b.set(R5,Fe,PT_BISHOP,SIDE_BLACK);
-    // b.set(R2,Fb,PT_PAWN,  SIDE_BLACK);
-    // b.set(R1,Fa,PT_PAWN,  SIDE_WHITE);
+    b.set(e5,PT_BISHOP,SIDE_BLACK);
+    // b.set(b2,PT_PAWN,  SIDE_BLACK);
+    b.set(a1,PT_PAWN,  SIDE_WHITE);
+
+    std::cout << b.diagram() << std::endl;
+    b.test_for_attack(b.at(a1));
 
     // DiagMoveRule r;
     // r.can_attack(b, b.at(R5,Fe), Square(R8,Fh));
@@ -33,17 +36,17 @@ int main(int argc, char **argv) {
     //     std::cout << *move << std::endl;
 
     // Board b("rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1");
-    std::string fen(argv[1]);
-    // while( std::getline(std::cin, fen)) {
-        std::cout << fen << std::endl;
-        Board b(fen);
-        MoveList ml;
-        b.get_moves(ml);
-        for ( MovePtr m : ml )
-            std::cout << *m << ' ' << std::endl;
-        std::cout << b.fen() << std::endl;
-        std::cout << b.diagram() << std::endl;
-        std::cout << b.test_for_check(SIDE_WHITE);
+    // std::string fen(argv[1]);
+    // // while( std::getline(std::cin, fen)) {
+    //     std::cout << fen << std::endl;
+    //     Board b(fen);
+    //     MoveList ml;
+    //     b.get_moves(ml);
+    //     for ( MovePtr m : ml )
+    //         std::cout << *m << ' ' << std::endl;
+    //     std::cout << b.fen() << std::endl;
+    //     std::cout << b.diagram() << std::endl;
+    //     std::cout << b.test_for_check(SIDE_WHITE);
     // }
     return 0;
 }
