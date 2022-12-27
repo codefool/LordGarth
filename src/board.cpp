@@ -6,6 +6,8 @@
 #include <utility>
 #include <vector>
 
+#include "constants.h"
+#include "move.h"
 #include "board.h"
 
 
@@ -175,11 +177,103 @@ void Board::set_initial_position() {
 
 MoveList& Board::get_moves(MoveList& moves) {
     for ( auto pp : _pm ) {
-        for ( MoveRuleOrd ord : piece_move_rules[pp.second->type()] ) {
-            move_rules[ord]->get_moves( this, pp.second, moves );
+        PiecePtr ptr( pp.second );
+        if ( ptr->moves_axes() ) {
+            gather_moves(ptr, axes_dirs, moves);
+        }
+        if ( ptr->moves_diag() ) {
+            gather_moves(ptr, diag_dirs, moves);
+        }
+        if ( ptr->moves_knight() ) {
+            Square org(ptr->square());
+            for(Dir dir : knight_moves) {
+                auto res = seek(ptr, dir, Square::UNBOUNDED);
+                if ( res.rc == Board::SEEKRC_OUT_OF_BOUNDS )
+                    continue;
+                
+                MoveAction ma = MV_NONE;
+                if ( res.rc == Board::SEEKRC_FOUND_OPPONENT ) {
+                    ma = MV_CAPTURE;
+                } else if ( res.rc == Board::SEEKRC_NOT_FOUND ) {
+                    ma = MV_MOVE;
+                }
+                if ( ma != MV_NONE )
+                    moves.push_back(Move::create(ma, MR_NONE, res.src, res.path.back()));
+            }
+        }
+        if ( ptr->moves_pawn() ) {
+            get_pawn_moves( ptr, moves );
         }
     }
     return moves;
+}
+
+void Board::get_pawn_moves( PiecePtr ptr, MoveList& moves ) {
+    // pawns are filthy animals ...
+    //
+    // 1. Pawns can only move one square forward.
+    // 2. Pawns on their home square may move two squares forward.
+    // 3. Pawns may capture directly to the UPL or UPR (or DNL/DLR for black pawns.)
+    // 4. A pawn on its own fifth rank may capture a neighboring
+    //    pawn en passant moving UPL or UPR iif the target pawn
+    //    moved forward two squares on its last on-move.
+    // 5. A pawn that reaches the eighth rank is promoted.
+    //
+    // Directions are, of course, side dependent.
+    // Case 1: pawns can only move one square forwad.
+    bool   isBlack = ptr->is_black();
+    Square ppos    = ptr->square();
+    Dir    updn    = (isBlack)?DN:UP;
+    Rank   pnhm    = (isBlack)?R7:R2;
+    Square pos     = ppos + offs[updn];
+    if( pos.in_bounds() && is_empty(pos) ) {
+        // Case 1: pawn can move forward
+        if ( (isBlack && pos.rank() == R1) || (pos.rank() == R8) ) {
+            // Case 5. A pawn reaching its eighth rank is promoted
+            //
+            // As we're collecting all possible moves, record four
+            // promotions.
+            for( auto action : {MV_PROM_QUEEN, MV_PROM_BISHOP, MV_PROM_KNIGHT, MV_PROM_ROOK})
+                moves.push_back(Move::create(action, MR_NONE, ppos, pos));
+        } else {
+            moves.push_back(Move::create(MV_MOVE, MR_NONE, ppos, pos));
+        }
+        // Case 2: Pawns on their home square may move two spaces.
+        if ( ppos.rank() == pnhm ) {
+            pos += offs[updn];
+            if( pos.in_bounds() && is_empty(pos) )
+                moves.push_back(Move::create(MV_MOVE, MR_NONE, ppos, pos));
+        }
+    }
+
+    // Case 3: Pawns may capture directly to the UPL or UPR.
+    // see if an opposing piece is UPL or UPR
+    const DirList *dirs = (isBlack) ? &black_pawn_attack : &white_pawn_attack;
+    gather_moves( ptr, *dirs, moves, true );
+
+    // Case 4. A pawn on its own fifth rank may capture a neighboring pawn en passant moving
+    // UPL or UPR iif the target pawn moved forward two squares on its last on-move.
+
+    // First check if an en passant pawn exists
+    // AND the pawn has not moved off its own rank (is not of type PT_PAWN_OFF)
+    // AND pawn is on its fifth rank.
+    // AND if target pawn is adjacent to this pawn
+    if ( ptr->type() == PT_PAWN && has_en_passant() ) {
+        // an en passant candidate exists
+        Rank r_pawn = (isBlack) ? R4 : R5;      // rank where the pawn is
+        Rank r_move = (isBlack) ? R3 : R6;      // rank with  the space where our pawn moves
+        File r_file = get_en_passant().file();
+        // the en passant file is the file that contains the subject pawn
+        // if our pawn is one square away (left or right) from the en passant file
+        // then we *can* capture that pawn.
+        if( ppos.rank() == r_pawn && std::abs(ppos.file() - r_file) == 1 ) {
+            // If so, check if the space above the target pawn is empty.
+            // If so, then en passant is possible.
+            Square epos( r_move, r_file ); // pos of target square
+            if ( is_empty(epos) )
+                moves.push_back( Move::create( MV_EN_PASSANT, MR_NONE, ppos, epos ) );
+        }
+    }
 }
 
 std::string Board::diagram() {

@@ -1,3 +1,5 @@
+#include "constants.h"
+#include "move.h"
 #include "board.h"
 
 void Board::apply_move(Move& mov, Board& cpy) {

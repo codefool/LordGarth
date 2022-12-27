@@ -4,7 +4,6 @@ class Board; // forward
 
 #include "constants.h"
 #include "piece.h"
-#include "moverule.h"
 #include "util.h"
 
 class Board {
@@ -61,6 +60,7 @@ public:
     PieceList get_side_pieces( Side s );
     void set_initial_position();
     MoveList& get_moves(MoveList& moves);
+    void get_pawn_moves( PiecePtr ptr, MoveList& moves);
     void apply_move(Move& mov, Board& cpy);
     void move_piece(PiecePtr ptr, Square dst);
     std::string diagram();
