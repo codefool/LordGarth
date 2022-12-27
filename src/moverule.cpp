@@ -1,10 +1,8 @@
 #include "moverule.h"
 #include "board.h"
 
-DirList AxesMoveRule::dirs{UP, DN, LFT, RGT};
-
 void AxesMoveRule::get_moves( Board* b, PiecePtr pt, MoveList& moves) {
-    b->gather_moves(pt, dirs, moves);
+    b->gather_moves(pt, axes_dirs, moves);
 }
 
 bool AxesMoveRule::can_attack( Board *b, PiecePtr src, PiecePtr trg ) {
@@ -26,21 +24,18 @@ bool AxesMoveRule::can_attack( Board *b, PiecePtr src, PiecePtr trg ) {
     return b->seek(src, dir, trg).rc == Board::SEEKRC_TARGET_FOUND;
 }
 
-
-DirList DiagMoveRule::dirs{UPL, UPR, DNL, DNR};
-
 void DiagMoveRule::get_moves( Board *b, PiecePtr pt, MoveList& moves) {
-    b->gather_moves(pt, dirs, moves);
+    b->gather_moves(pt, diag_dirs, moves);
 }
 
 bool DiagMoveRule::can_attack( Board *b, PiecePtr src, PiecePtr trg ) {
     // To attack on the diagnonal, the dr/df of the src/trg must be equal.
-    Square org(src->square());
-    Square dst(src->square());
-    short dr = dst.rank() - dst.rank();
-    short df = dst.file() - dst.file();
-    if ( std::abs(dr) != std::abs(df) )
-        return false;
+    // Square org(src->square());
+    // Square dst(src->square());
+    // short dr = org.rank() - dst.rank();
+    // short df = org.file() - dst.file();
+    // if ( std::abs(dr) != std::abs(df) )
+    //     return false;
 
     // trg is on the same diagonal, so now determine if there is anything 
     // between src and trg. Be a little smart, as the signs of dr/df will
@@ -48,18 +43,17 @@ bool DiagMoveRule::can_attack( Board *b, PiecePtr src, PiecePtr trg ) {
     //     dr    df
     // +  down  right
     // -  up    left
-    Dir dir = (dr < 0) ? (df < 0) ? DNL : DNR 
-                        : (df < 0) ? UPL : UPR;         
+    const Dir dir = src->square().axes_bearing(trg->square());
+    if ( dir == NOWHERE )
+        return false;
+    // Dir dir = (dr < 0) ? (df < 0) ? DNL : DNR 
+    //                    : (df < 0) ? UPL : UPR;         
     return b->seek(src, dir, trg).rc == Board::SEEKRC_TARGET_FOUND;
 }
 
-
-
-DirList KnightMoveRule::dirs{ KLUP, KUPL, KUPR, KRUP, KRDN, KDNR, KDNL, KLDN };
-
 void KnightMoveRule::get_moves( Board *b, PiecePtr pt, MoveList& moves) {
     Square org(pt->square());
-    for(Dir dir : dirs) {
+    for(Dir dir : knight_moves) {
         auto res = b->seek(pt, dir, Square::UNBOUNDED);
         if ( res.rc == Board::SEEKRC_OUT_OF_BOUNDS )
             continue;
@@ -80,17 +74,13 @@ bool KnightMoveRule::can_attack( Board *b, PiecePtr src, PiecePtr trg ) {
     // possible moves are the target square - quit.
     Square org(src->square());
     Square dst(trg->square());
-    for(Dir dir : dirs) {
+    for(Dir dir : knight_moves) {
         Square here = org + offs[dir];
         if ( dst == here )
             return b->at(here) == trg;
     }
     return false;
 }
-
-
-DirList PawnMoveRule::on_black{DNL,DNR};
-DirList PawnMoveRule::on_white{UPL,UPR};
 
 void PawnMoveRule::get_moves( Board *b, PiecePtr pt, MoveList& moves) {
     // pawns are filthy animals ...
@@ -132,7 +122,7 @@ void PawnMoveRule::get_moves( Board *b, PiecePtr pt, MoveList& moves) {
 
     // Case 3: Pawns may capture directly to the UPL or UPR.
     // see if an opposing piece is UPL or UPR
-    DirList *dirs = (isBlack) ? &on_black : &on_white;
+    const DirList *dirs = (isBlack) ? &black_pawn_attack : &white_pawn_attack;
     b->gather_moves( pt, *dirs, moves, true );
 
     // Case 4. A pawn on its own fifth rank may capture a neighboring pawn en passant moving
@@ -171,7 +161,7 @@ bool PawnMoveRule::can_attack( Board *b, PiecePtr src, PiecePtr trg ) {
     Square org(src->square());
     Square dst(trg->square());
     bool isBlack = src->is_black();
-    DirList *dirs = (isBlack) ? &on_black : &on_white;
+    const DirList *dirs = (isBlack) ? &black_pawn_attack : &white_pawn_attack;
     for ( auto dir : *dirs )
         if ( dst == org + offs[ dir ] )
             return true;
@@ -180,8 +170,12 @@ bool PawnMoveRule::can_attack( Board *b, PiecePtr src, PiecePtr trg ) {
     return false;
 }
 
-
 void CastleMoveRule::get_moves( Board *b, PiecePtr pt, MoveList& moves) {
+    // check if castling can occur.
+    // 1. Neither the king nor the rook can have moved
+    // 2. The squares between the king and the rook must be empty [8A4b]
+    // 3. Theking cannot be in check [8A4a], and 
+    // 4. The king cannot move over check [8A4a].
 }
 
 std::map<MoveRuleOrd, MoveRulePtr> move_rules{

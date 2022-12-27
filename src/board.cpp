@@ -280,3 +280,45 @@ PiecePtr Board::EMPTY = std::make_shared<Piece>(PT_EMPTY, SIDE_WHITE);
 
 // initial position FEN notation
 const char *Board::init_pos_fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 0";
+
+
+short Board::test_for_check(Side s) {
+    PiecePtr   king(_kings[s]);
+    Square     trg(king->square());
+    PieceList  att(get_side_pieces(OTHER_SIDE(s)));
+    short      cnt(0);
+    SeekResult res;
+    Dir        dir;
+    for ( PiecePtr attacker : att ) {
+        Square src = attacker->square();
+        if ( attacker->moves_diag() && (dir = src.diag_bearing(trg)) != NOWHERE ) { 
+            res = seek( attacker, dir, trg );
+            if ( res.enc == king )
+                cnt++;                     
+        }
+        if ( attacker->moves_axes() && ( dir = src.axes_bearing(trg) ) != NOWHERE ) {
+            res = seek( attacker, dir, trg );
+            if ( res.enc == king )
+                cnt++;                     
+        }
+        if ( attacker->moves_knight() ) {
+            for ( Dir dir : knight_moves ) {
+                if ( attacker->square() + offs[dir] == trg ) {
+                    cnt++;
+                    break;
+                }
+            }
+        }
+        if ( attacker->moves_pawn() ) {
+            const DirList *dirs = ( s == SIDE_WHITE ) ? &black_pawn_attack : &white_pawn_attack;
+            for ( Dir dir : *dirs ) {
+                if ( attacker->square() + offs[dir] == trg ) {
+                    cnt++;
+                    break;
+                }
+            }
+        }
+    }
+
+    return cnt;
+}

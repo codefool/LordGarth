@@ -24,6 +24,10 @@ public:
     const File      file() const;
     const bool      is_black() const;
     const bool      is_empty() const;
+    const bool      moves_diag() const;
+    const bool      moves_axes() const;
+    const bool      moves_pawn() const;
+    const bool      moves_knight() const;
 
     void place( Square& squ );
     void promote(PieceType pt);

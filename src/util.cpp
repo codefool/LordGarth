@@ -1,3 +1,4 @@
+#include "constants.h"
 #include "util.h"
 
 std::vector<std::string> split(std::string target, std::string delimiter) {

@@ -17,8 +17,6 @@ public:
 
 // movement rule for pieces that can move on axes
 class AxesMoveRule : public MoveRule {
-private:
-    static DirList dirs;
 public:
     virtual void get_moves( Board* b, PiecePtr pt, MoveList& moves);
     virtual bool can_attack( Board *b, PiecePtr src, PiecePtr trg );
@@ -26,8 +24,6 @@ public:
 
 // movement rule for pieces that can on diagonals
 class DiagMoveRule : public MoveRule {
-private:
-    static DirList dirs;
 public:
     virtual void get_moves( Board *b, PiecePtr pt, MoveList& moves);
     virtual bool can_attack( Board *b, PiecePtr src, PiecePtr trg );
@@ -35,8 +31,6 @@ public:
 
 // movement rule for knights
 class KnightMoveRule : public MoveRule {
-private:
-    static DirList dirs;
 public:    
     virtual void get_moves( Board *b, PiecePtr pt, MoveList& moves);
     virtual bool can_attack( Board *b, PiecePtr src, PiecePtr trg );
@@ -44,10 +38,6 @@ public:
 
 // movement rule for pawns
 class PawnMoveRule : public MoveRule {
-private:    
-    static DirList on_black;
-    static DirList on_white;
-
 public:
     virtual void get_moves( Board *b, PiecePtr pt, MoveList& moves);
     virtual bool can_attack( Board *b, PiecePtr src, PiecePtr trg );

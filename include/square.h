@@ -22,6 +22,9 @@ struct Square : public std::pair<short,short>
     bool operator==(const Square& rhs);
     bool in_bounds();
 
+    Dir axes_bearing(Square trg) const;
+    Dir diag_bearing(Square trg) const;
+
     friend std::ostream& operator<<(std::ostream& os, const Square& squ);
     static Square UNBOUNDED;
 };

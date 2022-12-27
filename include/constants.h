@@ -6,6 +6,9 @@
 #include <vector>
 
 enum Side { SIDE_WHITE=0, SIDE_BLACK };
+
+#define OTHER_SIDE(s) ((s==SIDE_WHITE)?SIDE_BLACK:SIDE_WHITE)
+
 enum Rank { R1=0, R2, R3, R4, R5, R6, R7, R8 };
 enum File { Fa=0, Fb, Fc, Fd, Fe, Ff, Fg, Fh };
 
@@ -70,12 +73,23 @@ enum IllegalMoveReason {
 //                rank  file
 typedef std::pair<short,short>    Offset;
 
+extern const Offset offs[];
+
 enum Dir { 
     UP,   DN,   LFT,  RGT,  UPR,  UPL,  DNR,  DNL,
-    KLUP, KUPL, KUPR, KRUP, KRDN, KDNR, KDNL, KLDN
+    KLUP, KUPL, KUPR, KRUP, KRDN, KDNR, KDNL, KLDN,
+    NOWHERE
 };
 
 typedef std::vector<Dir> DirList;
+
+extern const DirList white_pawn_attack;
+extern const DirList black_pawn_attack;
+
+extern const DirList axes_dirs;
+extern const DirList diag_dirs;
+
+extern const DirList knight_moves;  // trying to make some front-page drive-in news
 
 class Board;  // forward
 

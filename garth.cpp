@@ -2,7 +2,7 @@
 
 #include "garth.h"
 
-int main() {
+int main(int argc, char **argv) {
     // Board b(false);
     // MoveList ml;
     // b.get_moves(ml);
@@ -33,8 +33,8 @@ int main() {
     //     std::cout << *move << std::endl;
 
     // Board b("rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1");
-    std::string fen;
-    while( std::getline(std::cin, fen)) {
+    std::string fen(argv[1]);
+    // while( std::getline(std::cin, fen)) {
         std::cout << fen << std::endl;
         Board b(fen);
         MoveList ml;
@@ -43,6 +43,7 @@ int main() {
             std::cout << *m << ' ' << std::endl;
         std::cout << b.fen() << std::endl;
         std::cout << b.diagram() << std::endl;
-    }
+        std::cout << b.test_for_check(SIDE_WHITE);
+    // }
     return 0;
 }

@@ -67,6 +67,8 @@ public:
     void gather_moves( PiecePtr pp, DirList dirs, MoveList& moves, bool isPawnCapture = false);
     MovePtr check_square(PiecePtr pp, Square trg, bool isPawnCapture = false);
 
+    short test_for_check(Side s);
+
     enum SeekResultCode {
         SEEKRC_NONE,            
         SEEKRC_OUT_OF_BOUNDS,   // seek walked off the board

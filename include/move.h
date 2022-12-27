@@ -7,8 +7,6 @@
 #include "move.h"
 #include "square.h"
 
-extern const Offset offs[];
-
 struct Move {
     MoveAction action;
     MoveResult result;

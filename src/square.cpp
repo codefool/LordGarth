@@ -54,6 +54,28 @@ bool Square::in_bounds() {
     return R1 <= first && first <= R8 && Fa <= second && second <= Fh;
 }
 
+Dir Square::axes_bearing(Square dst) const {
+    short dr = dst.rank() - first;
+    short df = dst.file() - second;
+    Dir dir = NOWHERE;
+    if ( dr == 0 || df == 0 ) {
+        dir = ( dr == 0 ) ? ( df < 0 ) ? LFT : RGT
+                          : ( dr < 0 ) ? DN  : UP;
+    }
+    return dir;                        
+}
+
+Dir Square::diag_bearing(Square dst) const {
+    short dr = dst.rank() - first;
+    short df = dst.file() - second;
+    Dir dir = NOWHERE;
+    if ( std::abs(dr) == std::abs(df) ) {
+        dir = ( dr < 0 ) ? ( df < 0 ) ? DNL : DNR 
+                         : ( df < 0 ) ? UPL : UPR;
+    }
+    return dir;                        
+}
+
 Square Square::UNBOUNDED(-1,-1);
 
 std::ostream& operator<<(std::ostream& os, const Square& squ) {
