@@ -15,6 +15,10 @@ struct Move {
 
     Move(MoveAction ma, MoveResult mr, Square org, Square dst );
     static MovePtr create(MoveAction ma, MoveResult mr, Square org, Square dst );
+
+    MovePacked pack() const;
+    void unpack(MovePacked pack);
+
     friend std::ostream& operator<<(std::ostream& os, const Move& mv);
 };
 

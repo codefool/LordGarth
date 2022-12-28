@@ -169,14 +169,22 @@ union GameInformation {
     } f;
 };
 
-union Packed
-{
+union Packed {
     uint8_t b[32];
     struct {
         uint64_t gi;    // game information
         uint64_t pop;   // population bitmap
         uint64_t lo;    // lo 64-bits population info
         uint64_t hi;    // hi 64-bits population info
+    } f;
+};
+
+union MovePacked {
+    uint16_t i;
+    struct {
+        uint16_t action:4;
+        uint16_t source:6;
+        uint16_t target:6;
     } f;
 };
 #pragma pack()

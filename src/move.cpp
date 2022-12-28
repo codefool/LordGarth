@@ -8,6 +8,22 @@ MovePtr Move::create(MoveAction ma, MoveResult mr, Square org, Square dst ) {
     return std::make_shared<Move>(ma, mr, org, dst);
 }
 
+MovePacked Move::pack() const {
+    MovePacked ret;
+    ret.i = 0;
+    ret.f.action = action;
+    ret.f.source = org.rnf();
+    ret.f.target = dst.rnf();
+
+    return ret;
+}
+
+void Move::unpack(MovePacked pack) {
+    action = MoveAction(pack.f.action);
+    org    = Square(RnF(pack.f.source));
+    dst    = Square(RnF(pack.f.target));
+}
+
 std::ostream& operator<<(std::ostream& os, const Move& mv) {
     switch (mv.action) {
         case MV_NONE            : os << "MV_NONE"; break;
