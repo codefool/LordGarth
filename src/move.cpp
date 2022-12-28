@@ -4,6 +4,10 @@ Move::Move(MoveAction ma, MoveResult mr, Square org, Square dst )
 : action(ma), result(mr), org(org), dst(dst)
 {}
 
+Move::Move(MovePacked pack) {
+    unpack(pack);
+}
+
 MovePtr Move::create(MoveAction ma, MoveResult mr, Square org, Square dst ) {
     return std::make_shared<Move>(ma, mr, org, dst);
 }
@@ -12,6 +16,7 @@ MovePacked Move::pack() const {
     MovePacked ret;
     ret.i = 0;
     ret.f.action = action;
+    ret.f.result = result;
     ret.f.source = org.rnf();
     ret.f.target = dst.rnf();
 
@@ -20,6 +25,7 @@ MovePacked Move::pack() const {
 
 void Move::unpack(MovePacked pack) {
     action = MoveAction(pack.f.action);
+    result = MoveResult(pack.f.result);
     org    = Square(RnF(pack.f.source));
     dst    = Square(RnF(pack.f.target));
 }

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstring>
 #include <map>
 #include <memory>
 #include <utility>
@@ -167,9 +168,12 @@ union GameInformation {
         uint64_t half_move_clock       :8;
         uint64_t full_move_clock       :8;
     } f;
+    GameInformation() 
+    : i(0) 
+    {}
 };
 
-union Packed {
+union BoardPacked {
     uint8_t b[32];
     struct {
         uint64_t gi;    // game information
@@ -177,14 +181,26 @@ union Packed {
         uint64_t lo;    // lo 64-bits population info
         uint64_t hi;    // hi 64-bits population info
     } f;
+
+    BoardPacked() {
+        std::memset(b, 0x00, sizeof(b));
+    }
 };
 
 union MovePacked {
-    uint16_t i;
+    uint32_t i;
     struct {
-        uint16_t action:4;
-        uint16_t source:6;
-        uint16_t target:6;
+        uint32_t action:4;
+        uint32_t result:4;
+        uint32_t source:6;
+        uint32_t target:6;
+        uint32_t unused:12;
     } f;
+    MovePacked() 
+    : i(0) 
+    {}
 };
 #pragma pack()
+
+typedef std::vector<BoardPacked> BoardPackedList;
+typedef std::vector<MovePacked>  MovePackedList;

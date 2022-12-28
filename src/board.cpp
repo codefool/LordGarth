@@ -24,6 +24,10 @@ Board::Board(std::string fen) {
     from_fen(fen);
 }
 
+Board::Board(BoardPacked pack) {
+    unpack(pack);
+}
+
 int Board::piece_cnt() { return _pm.size(); }
 
 PiecePtr Board::at( Rank r, File f ) const {

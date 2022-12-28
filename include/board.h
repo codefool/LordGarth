@@ -23,6 +23,7 @@ public:
     Board(bool initial_position = true);
     Board(const char *fen);
     Board(std::string fen);
+    Board(BoardPacked pack);
     int piece_cnt();
     PiecePtr at( Rank r, File f ) const;
     PiecePtr at( Square squ ) const;
@@ -96,8 +97,8 @@ public:
     void from_fen(const std::string& fen);
     std::string fen();
 
-    Packed pack() const;
-    void   unpack(Packed pack);
+    BoardPacked pack() const;
+    void        unpack(BoardPacked pack);
 public:
     static PiecePtr EMPTY;
     static const char *init_pos_fen;

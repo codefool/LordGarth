@@ -47,7 +47,7 @@ int main(int argc, char **argv) {
 
     Board b;
     MoveList ml;
-    Packed p = b.pack();
+    BoardPacked p = b.pack();
     // b.get_moves(ml);
     std::cout << b.diagram() << ' ' << ml.size() << std::endl;
     Board c(false);

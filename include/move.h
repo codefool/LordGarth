@@ -14,6 +14,7 @@ struct Move {
     Square     dst;
 
     Move(MoveAction ma, MoveResult mr, Square org, Square dst );
+    Move(MovePacked pack);
     static MovePtr create(MoveAction ma, MoveResult mr, Square org, Square dst );
 
     MovePacked pack() const;

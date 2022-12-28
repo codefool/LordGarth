@@ -23,8 +23,8 @@ union jig_n2b {
 };
 #pragma pack()
 
-Packed Board::pack() const {
-    Packed ret;
+BoardPacked Board::pack() const {
+    BoardPacked ret;
 
     GameInformation gi;
     gi.f.piece_cnt = _pm.size();
@@ -73,7 +73,7 @@ Packed Board::pack() const {
     return ret;
 }
 
-void Board::unpack(Packed pack) {
+void Board::unpack(BoardPacked pack) {
     jig_dw2b pieces;
 
     GameInformation gi;
