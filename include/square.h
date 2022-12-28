@@ -17,6 +17,7 @@ struct Square : public std::pair<short,short>
 
     Rank rank() const;
     File file() const;
+    RnF  rnf() const;
 
     std::string to_string() const;
     Square operator+(const Offset& off) const;

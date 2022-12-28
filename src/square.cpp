@@ -28,11 +28,14 @@ Square::Square(const char *fr) {
 
 Square::Square(RnF rnf) {
     first  = (rnf >> 3);
-    second = (rnf &0x07);
+    second = (rnf & 0x07);
 }
 
 Rank Square::rank() const { return (Rank)first; }
 File Square::file() const { return (File)second; }
+RnF  Square::rnf() const {
+    return RnF((first << 3) | second);
+}
 
 std::string Square::to_string() const {
     std::stringstream ss;

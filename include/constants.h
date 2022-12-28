@@ -135,3 +135,48 @@ class Piece; // forward
 typedef std::shared_ptr<Piece>    PiecePtr;
 typedef std::vector<PiecePtr>     PieceList;
 typedef std::map<Square,PiecePtr> PieceMap;
+
+// Packed structures
+//
+// Game Information
+//
+// xxxx xxxx .... .... .... .... .... .... = number of active pieces on the board (0..31)
+// .... .... x... .... .... .... .... .... = white castle kingside enabled  (WK or WKR has not moved)
+// .... .... .x.. .... .... .... .... .... = white castle queenside enabled (WK or WQR has not moved)
+// .... .... ..x. .... .... .... .... .... = black castle kingside enabled  (BK or BKR has not moved)
+// .... .... ...x .... .... .... .... .... = black castle queenside enabled (BK or BQR has not moved)
+// .... .... .... x... .... .... .... .... = side on-move: 0-white, 1-black
+// .... .... .... .xxx xxx. .... .... .... = 
+// .... .... .... .... .... .... .... .... = rank/file of en passant pawn
+
+// It is imperitive that all unused bits - or bits that are out of scope - be set to 0
+
+
+#pragma pack(1)
+union GameInformation {
+    uint64_t i;
+    struct {
+        uint64_t piece_cnt             :8;
+        uint64_t castle_white_queenside:1;
+        uint64_t castle_white_kingside :1;
+        uint64_t castle_black_queenside:1;
+        uint64_t castle_black_kingside :1;
+        uint64_t on_move               :1;
+        uint64_t en_passant            :7;
+        uint64_t unused                :28;
+        uint64_t half_move_clock       :8;
+        uint64_t full_move_clock       :8;
+    } f;
+};
+
+union Packed
+{
+    uint8_t b[32];
+    struct {
+        uint64_t gi;    // game information
+        uint64_t pop;   // population bitmap
+        uint64_t lo;    // lo 64-bits population info
+        uint64_t hi;    // hi 64-bits population info
+    } f;
+};
+#pragma pack()

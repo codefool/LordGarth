@@ -95,6 +95,9 @@ public:
 
     void from_fen(const std::string& fen);
     std::string fen();
+
+    Packed pack() const;
+    void   unpack(Packed pack);
 public:
     static PiecePtr EMPTY;
     static const char *init_pos_fen;

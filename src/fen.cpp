@@ -39,8 +39,7 @@ void Board::from_fen(const std::string& fen)
                 case 'R': pt = PT_ROOK;   break;
                 case 'P': pt = PT_PAWN;   break;
             }
-            set(Square(rank, file), pt, side);
-            ++file;
+            set(Square(rank, file++), pt, side);
         } else if ( std::isdigit(*p) ) {
             // count of empty squares
             file += short( *p - '0' );

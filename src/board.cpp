@@ -67,7 +67,7 @@ void Board::place( PiecePtr pp, Square squ) {
     pp->place(squ);
     _pm[squ] = pp;
     // remember where the kings are
-    if ( pp->type() == PT_KING )
+    if ( pp->is_king() )
         _kings[ pp->side() ] = pp;
 }
 
@@ -182,12 +182,6 @@ void Board::set_initial_position() {
 MoveList& Board::get_moves(MoveList& moves) const {
     for ( auto pp : _pm ) {
         PiecePtr ptr( pp.second );
-        if ( ptr->moves_axes() ) {
-            gather_moves(ptr, axes_dirs, moves);
-        }
-        if ( ptr->moves_diag() ) {
-            gather_moves(ptr, diag_dirs, moves);
-        }
         if ( ptr->moves_knight() ) {
             Square org(ptr->square());
             for(Dir dir : knight_moves) {
@@ -204,9 +198,17 @@ MoveList& Board::get_moves(MoveList& moves) const {
                 if ( ma != MV_NONE )
                     moves.push_back(Move::create(ma, MR_NONE, res.src, res.path.back()));
             }
+            continue;
         }
         if ( ptr->moves_pawn() ) {
             get_pawn_moves( ptr, moves );
+            continue;
+        }
+        if ( ptr->moves_axes() ) {
+            gather_moves(ptr, axes_dirs, moves);
+        }
+        if ( ptr->moves_diag() ) {
+            gather_moves(ptr, diag_dirs, moves);
         }
     }
     return moves;
@@ -262,7 +264,7 @@ void Board::get_pawn_moves( PiecePtr ptr, MoveList& moves ) const {
     // AND the pawn has not moved off its own rank (is not of type PT_PAWN_OFF)
     // AND pawn is on its fifth rank.
     // AND if target pawn is adjacent to this pawn
-    if ( ptr->type() == PT_PAWN && has_en_passant() ) {
+    if ( ptr->is_pawn() && has_en_passant() ) {
         // an en passant candidate exists
         Rank r_pawn = (isBlack) ? R4 : R5;      // rank where the pawn is
         Rank r_move = (isBlack) ? R3 : R6;      // rank with  the space where our pawn moves
@@ -384,40 +386,42 @@ const char *Board::init_pos_fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w
 
 short Board::test_for_attack(PiecePtr trg) const {
     Square     dst(trg->square());
-    PieceList  att(get_side_pieces(OTHER_SIDE(trg->side())));
+    PieceList  attackers(get_side_pieces(OTHER_SIDE(trg->side())));
     short      cnt(0);
     SeekResult res;
     Dir        dir;
-    for ( PiecePtr attacker : att ) {
-        Square src = attacker->square();
-        if ( attacker->moves_diag() && (dir = src.diag_bearing(dst)) != NOWHERE ) { 
-            res = seek( attacker, dir, trg );
-            if ( res.enc == trg )
-                cnt++;                     
-        }
-        if ( attacker->moves_axes() && ( dir = src.axes_bearing(dst) ) != NOWHERE ) {
-            res = seek( attacker, dir, trg );
-            if ( res.enc == trg )
-                cnt++;                     
-        }
-        if ( attacker->moves_knight() ) {
+    for ( PiecePtr org : attackers ) {
+        Square src = org->square();
+        if ( org->moves_knight() ) {
             for ( Dir dir : knight_moves ) {
-                if ( attacker->square() + offs[dir] == dst ) {
+                if ( org->square() + offs[dir] == dst ) {
                     cnt++;
                     break;
                 }
             }
-            // since knight cannot move like anything else, we're dong for this cycle
+            // since knight cannot move like anything else, we're done for this cycle
             continue;   
         }
-        if ( attacker->moves_pawn() ) {
+        if ( org->moves_pawn() ) {
             const DirList *dirs = ( trg->side() == SIDE_WHITE ) ? &black_pawn_attack : &white_pawn_attack;
             for ( Dir dir : *dirs ) {
-                if ( attacker->square() + offs[dir] == dst ) {
+                if ( org->square() + offs[dir] == dst ) {
                     cnt++;
                     break;
                 }
             }
+            // since pawn cannot move like anything else, we're done for this cycle
+            continue;
+        }
+        if ( org->moves_diag() && (dir = src.diag_bearing(dst)) != NOWHERE ) { 
+            res = seek( org, dir, trg );
+            if ( res.enc == trg )
+                cnt++;                     
+        }
+        if ( org->moves_axes() && ( dir = src.axes_bearing(dst) ) != NOWHERE ) {
+            res = seek( org, dir, trg );
+            if ( res.enc == trg )
+                cnt++;                     
         }
     }
 

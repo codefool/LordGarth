@@ -29,6 +29,21 @@ public:
     const bool      moves_pawn() const;
     const bool      moves_knight() const;
 
+    inline const uint8_t byte() const { 
+        uint8_t by(_t);
+        if (is_black())
+            by |= 0x08;
+        return by;
+    }
+
+    inline const bool    is_king()     const { return _t == PT_KING;     }
+    inline const bool    is_queen()    const { return _t == PT_QUEEN;    }
+    inline const bool    is_bishop()   const { return _t == PT_BISHOP;   }
+    inline const bool    is_knight()   const { return _t == PT_KNIGHT;   }
+    inline const bool    is_rook()     const { return _t == PT_ROOK;     }
+    inline const bool    is_pawn()     const { return _t == PT_PAWN;     }
+    inline const bool    is_pawn_off() const { return _t == PT_PAWN_OFF; }
+
     void place( Square& squ );
     void promote(PieceType pt);
     void set_glyph();

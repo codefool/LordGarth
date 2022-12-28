@@ -15,17 +15,18 @@ const Rank      Piece::rank() const { return (Rank)_q.first; }
 const File      Piece::file() const { return (File)_q.second; }
 const bool      Piece::is_black() const { return _s == SIDE_BLACK; }
 const bool      Piece::is_empty() const { return _t == PT_EMPTY; }
+
 const bool Piece::moves_diag() const {
-    return _t == PT_KING || _t == PT_QUEEN || _t == PT_BISHOP;
+    return is_king() || is_queen() || is_bishop();
 }
 const bool Piece::moves_axes() const {
-    return _t == PT_KING || _t == PT_QUEEN || _t == PT_ROOK;
+    return is_king() || is_queen() || is_rook();
 }
 const bool Piece::moves_pawn() const {
-    return _t == PT_PAWN || _t == PT_PAWN_OFF;
+    return is_pawn() || is_pawn_off();
 }
 const bool Piece::moves_knight() const {
-    return _t == PT_KNIGHT;
+    return is_knight();
 }
 
 void Piece::place( Square& squ ) { _q = squ; }
