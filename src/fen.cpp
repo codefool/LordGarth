@@ -154,7 +154,7 @@ std::string Board::fen()
     // Field 2 - Active Color
     // - "w" means that White is to move; "b" means that Black is to move
     //
-    ss << (( _on_move == SIDE_BLACK ) ? 'b' : 'w')
+    ss << (IS_BLACK( _on_move ) ? 'b' : 'w')
        << ' ';
 
     // Field 3 - Castling Availability

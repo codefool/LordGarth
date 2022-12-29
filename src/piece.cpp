@@ -6,14 +6,14 @@ Piece::Piece(PieceType t, Side s)
     set_glyph();
 }
 
-const PieceType Piece::type() const { return _t; }
-const Side      Piece::side() const { return _s; }
-const char      Piece::glyph() const { return _g; }
-const short     Piece::range() const { return ranges[_t]; }
-const Square    Piece::square() const { return _q; }
-const Rank      Piece::rank() const { return (Rank)_q.first; }
-const File      Piece::file() const { return (File)_q.second; }
-const bool      Piece::is_black() const { return _s == SIDE_BLACK; }
+const PieceType Piece::type()     const { return _t; }
+const Side      Piece::side()     const { return _s; }
+const char      Piece::glyph()    const { return _g; }
+const short     Piece::range()    const { return ranges[_t]; }
+const Square    Piece::square()   const { return _q; }
+const Rank      Piece::rank()     const { return (Rank)_q.first; }
+const File      Piece::file()     const { return (File)_q.second; }
+const bool      Piece::is_black() const { return IS_BLACK(_s); }
 const bool      Piece::is_empty() const { return _t == PT_EMPTY; }
 
 const bool Piece::moves_diag() const {

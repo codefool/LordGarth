@@ -32,7 +32,7 @@ BoardPacked Board::pack() const {
     gi.f.castle_white_kingside  = (_castle_white_kingside) ?1:0;
     gi.f.castle_black_queenside = (_castle_black_queenside)?1:0;
     gi.f.castle_black_kingside  = (_castle_black_kingside) ?1:0;
-    gi.f.on_move                = (_on_move == SIDE_WHITE) ?0:1;
+    gi.f.on_move                = IS_WHITE(_on_move)?0:1;
     gi.f.en_passant             = _en_passant.rnf();
     gi.f.unused                 = 0;
     gi.f.half_move_clock        = _half_move_clock;

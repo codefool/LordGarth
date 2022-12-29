@@ -45,6 +45,9 @@ public:
     void set_castle_black_queenside(bool state);
     bool get_castle_black_kingside() const;
     void set_castle_black_kingside(bool state);
+    bool side_can_castle(Side s) const;
+    bool side_can_castle_kingside(Side s) const;
+    bool side_can_castle_queenside(Side s) const;
     bool has_en_passant() const;
     void clear_en_passant();
     Square get_en_passant() const;
@@ -68,8 +71,9 @@ public:
     std::string diagram() const;
     void gather_moves( PiecePtr pp, DirList dirs, MoveList& moves, bool isPawnCapture = false) const;
     MovePtr check_square(PiecePtr pp, Square trg, bool isPawnCapture = false) const;
+    void check_castle( PiecePtr ptr, MoveList& moves ) const;
 
-    short test_for_attack(PiecePtr trg) const;
+    short test_for_attack(PiecePtr trg, Side s = SIDE_NONE) const;
     short test_for_check(Side s) const;
 
     enum SeekResultCode {
@@ -91,8 +95,8 @@ public:
         SeekResultCode rc; 
     };
 
-    SeekResult seek( PiecePtr src, Dir dir, PiecePtr trg ) const;
-    SeekResult seek( PiecePtr src, Dir dir, Square dst ) const;
+    SeekResult seek( PiecePtr src, Dir dir, PiecePtr trg, short range = 0 ) const;
+    SeekResult seek( PiecePtr src, Dir dir, Square dst, short range = 0 ) const;
 
     void from_fen(const std::string& fen);
     std::string fen();

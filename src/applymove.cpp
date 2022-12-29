@@ -9,6 +9,7 @@ void Board::apply_move(Move& mov, Board& cpy) {
     // now, all operations are done on cpy
     PiecePtr src = cpy.at(mov.org);
     PiecePtr trg = cpy.at(mov.dst);
+    Side     opp = OTHER_SIDE(src->side());
 
     switch( mov.action )
     {
@@ -46,7 +47,7 @@ void Board::apply_move(Move& mov, Board& cpy) {
     case MV_CAPTURE:
         move_piece( src, mov.dst );
         break;
-    case MV_EN_PASSANT: {
+    case MV_EN_PASSANT:
         // move the piece, but remove the pawn "passed by"
         //    a  b  c         a  b  c
         //   +--+--+--+      +--+--+--+
@@ -57,15 +58,17 @@ void Board::apply_move(Move& mov, Board& cpy) {
         //
         move_piece( src, mov.dst );
         // the pawn 'passed by' will be one square toward on-move
-        Dir d = (src->side() == SIDE_BLACK) ? UP : DN;
+        Dir d = IS_BLACK(src->side()) ? UP : DN;
         Square s = mov.dst + offs[d];
         // remove the piece from the board, but prob. need to record this somewhere.
         clear_square( s );
-        }
         break;
     }
-    // at this point check if either king is in check, and mark the move
+    // at this point check if either king is in check, mark the move
     // accordingly.
+    int check = test_for_check(opp);
+    if      (check > 1) mov.result = MR_DOUBLE_CHECK;
+    else if (check > 0) mov.result = MR_CHECK;
 }
 
 void Board::move_piece(PiecePtr ptr, Square dst) {
@@ -84,11 +87,15 @@ void Board::move_piece(PiecePtr ptr, Square dst) {
     // increment the half-move clock for 50-move rule
     _half_move_clock++;
 
+    // if this is a black move, then update the move count
+    if ( ptr->is_black() )
+        _full_move_cnt++;
+
     // check for key piece moves
     switch( ptr->type() ) {
         case PT_KING:
             // king moved - castling no longer available for both sides
-            if ( ptr->side() == SIDE_WHITE ) {
+            if ( IS_WHITE(ptr->side()) ) {
                 set_castle_white_kingside( false );
                 set_castle_white_queenside( false );
             } else {
@@ -99,7 +106,7 @@ void Board::move_piece(PiecePtr ptr, Square dst) {
 
         case PT_ROOK:
             // rook moved - castling no longer available for that side
-            if ( ptr->side() == SIDE_WHITE ) {
+            if ( IS_WHITE(ptr->side()) ) {
                      if ( org == a1 ) set_castle_white_queenside( false );
                 else if ( org == h1 ) set_castle_white_kingside( false );
             } else {

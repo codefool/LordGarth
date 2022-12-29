@@ -7,7 +7,7 @@
 
 int main(int argc, char **argv) {
     // Board b;
-    Board b("rnbqkbnr/2pppppp/8/8/4P3/8/PPPP1PPP/RNBQKBN1 b KQkq e3 0 1");
+    Board b("r3k2r/8/8/8/8/8/8/R3K2R w KQkq - 0 1");
     MoveList ml;
     BoardPacked p = b.pack();
     b.get_moves(ml);
@@ -20,8 +20,8 @@ int main(int argc, char **argv) {
     std::cout << p << std::endl;
     std::cout << ml.back()->pack() << std::endl;
 
-    // for (auto m : ml)
-    //     std::cout << *m << std::endl;
+    for (auto m : ml)
+        std::cout << *m << std::endl;
 
     // b.set(e5,PT_BISHOP,SIDE_BLACK);
     // b.set(b2,PT_PAWN,  SIDE_BLACK);

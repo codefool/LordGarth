@@ -5,9 +5,11 @@
 #include <utility>
 #include <vector>
 
-enum Side { SIDE_WHITE=0, SIDE_BLACK };
+enum Side { SIDE_WHITE=0, SIDE_BLACK, SIDE_NONE };
 
-#define OTHER_SIDE(s) ((s==SIDE_WHITE)?SIDE_BLACK:SIDE_WHITE)
+#define IS_WHITE(s) (s==SIDE_WHITE)
+#define IS_BLACK(s) (s==SIDE_BLACK)
+#define OTHER_SIDE(s) (IS_WHITE(s)?SIDE_BLACK:SIDE_WHITE)
 
 enum Rank : uint8_t { R1=0, R2, R3, R4, R5, R6, R7, R8 };
 enum File : uint8_t { Fa=0, Fb, Fc, Fd, Fe, Ff, Fg, Fh };

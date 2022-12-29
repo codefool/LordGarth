@@ -38,7 +38,11 @@ PiecePtr Board::at( Square squ ) const {
     auto itr = _pm.find( squ );
     if ( itr != _pm.end() )
         return itr->second;       
-    return EMPTY;
+    // if square is empty, create a temporary Piece that
+    // has the location we need.
+    PiecePtr mt = std::make_shared<Piece>(PT_EMPTY, SIDE_WHITE);
+    mt->place(squ);
+    return mt;
 }
 
 bool Board::is_empty(Rank r, File f) const {
@@ -46,7 +50,7 @@ bool Board::is_empty(Rank r, File f) const {
 }
 
 bool Board::is_empty(Square squ) const {
-    return at(squ) == EMPTY;
+    return at(squ)->type() == PT_EMPTY;
 }
 
 void Board::clear_square(Square squ) { 
@@ -84,9 +88,7 @@ void Board::set_on_move(Side s) {
 }
 
 void Board::toggle_on_move() {
-    _on_move = (_on_move == SIDE_BLACK)
-             ? SIDE_WHITE
-             : SIDE_BLACK;
+    _on_move = OTHER_SIDE(_on_move);
 }
 
 bool Board::has_en_passant() const {
@@ -169,6 +171,19 @@ void Board::set_castle_black_kingside(bool state) {
     _castle_black_kingside = state;
 }
 
+bool Board::side_can_castle(Side s) const {
+    if ( IS_BLACK(s) )
+        return _castle_black_kingside || _castle_black_queenside;
+    return _castle_white_kingside || _castle_white_queenside;
+}
+
+bool Board::side_can_castle_kingside(Side s) const {
+    return ( IS_BLACK(s) ) ? _castle_black_kingside : _castle_white_kingside;
+}
+
+bool Board::side_can_castle_queenside(Side s) const {
+    return ( IS_BLACK(s) ) ? _castle_black_queenside : _castle_white_queenside;
+}
 
 PieceList Board::get_side_pieces( Side s ) const {
     PieceList ret;
@@ -213,6 +228,9 @@ MoveList& Board::get_moves(MoveList& moves) const {
         }
         if ( ptr->moves_diag() ) {
             gather_moves(ptr, diag_dirs, moves);
+        }
+        if ( ptr->is_king() ) {
+            check_castle(ptr, moves);
         }
     }
     return moves;
@@ -286,6 +304,50 @@ void Board::get_pawn_moves( PiecePtr ptr, MoveList& moves ) const {
     }
 }
 
+void Board::check_castle( PiecePtr ptr, MoveList& moves ) const {
+    // ptr is a king, and check if the king can castle
+    // 1. The king and rook must have not moved
+    // 2. The squares between the king and the rook have to be empty [8A4b],
+    // 3. The king cannot be in check [8A4a], and
+    // 4. The king cannot move over check [8A4a].
+    //
+    // Also, check the first two squares from the king toward the rook are
+    // not under attack.
+    //
+    // so we seek from the king to the rook, and if the rook is found, then
+    // check the path to see if any square (including the king) is currently
+    // under attack.
+    SeekResult res;
+    if ( side_can_castle_kingside( ptr->side() ) ) {
+        RnF rook = (ptr->is_black()) ? h8 : a8;
+        res = seek(ptr,RGT,rook,7);
+        bool is_clear(true);
+        if ( res.rc == SEEKRC_FOUND_FRIENDLY && res.trg == res.path.back() ) {
+            for ( short idx(0); idx < res.path.size() - 1; ++idx )
+                if ( test_for_attack(at(res.path[idx]), ptr->side()) ) {
+                    is_clear = false;
+                    break;
+                }
+        }
+        if ( is_clear )
+            moves.push_back(Move::create( MV_CASTLE_KINGSIDE, MR_NONE, ptr->square(), rook));
+    }
+    if ( side_can_castle_queenside( ptr->side() ) ) {
+        RnF rook = (ptr->is_black()) ? h1 : a1;
+        res = seek(ptr,LFT,rook,7);
+        bool is_clear(true);
+        if ( res.rc == SEEKRC_FOUND_FRIENDLY && res.trg == res.path.back() ) {
+            for ( short idx(0); idx < res.path.size() - 1; ++idx )
+                if ( test_for_attack(at(res.path[idx]), ptr->side()) ) {
+                    is_clear = false;
+                    break;
+                }
+        }
+        if ( is_clear )
+            moves.push_back(Move::create( MV_CASTLE_QUEENSIDE, MR_NONE, ptr->square(), rook));
+    }
+}
+
 std::string Board::diagram() const {
     std::stringstream ss;
     for ( short r = R8; r >= R1; --r ) {
@@ -340,25 +402,25 @@ MovePtr Board::check_square(PiecePtr pp, Square dst, bool isPawnCapture ) const 
     return Move::create(MV_CAPTURE, MR_NONE, org, dst);
 }
 
-Board::SeekResult Board::seek( PiecePtr src, Dir dir, PiecePtr trg ) const {
-    SeekResult res = seek(src, dir, trg->square() );
+Board::SeekResult Board::seek( PiecePtr src, Dir dir, PiecePtr trg, short range ) const {
+    SeekResult res = seek(src, dir, trg->square(), range );
     if ( res.rc == SEEKRC_FOUND_FRIENDLY || res.rc == SEEKRC_FOUND_OPPONENT )
         if ( res.enc == trg )
             res.rc = SEEKRC_TARGET_FOUND;
     return res;
 }
 
-Board::SeekResult Board::seek( PiecePtr src, Dir dir, Square dst ) const {
+Board::SeekResult Board::seek( PiecePtr src, Dir dir, Square dst, short range ) const {
     SeekResult res;
     res.src   = src->square();
     res.trg   = dst;
     res.dir   = dir;
-    res.range = src->range();
+    res.range = (range > 0) ? range : src->range();
     res.rc    = SEEKRC_NONE;
 
-    Square here  = res.src;
-    short  range = res.range;
-    while ( range-- ) {
+    Square here = res.src;
+    short  rang = res.range;
+    while ( rang-- ) {
         Square test = here + offs[dir];
         if ( !test.in_bounds() ) {
             res.rc = SEEKRC_OUT_OF_BOUNDS;
@@ -382,15 +444,14 @@ Board::SeekResult Board::seek( PiecePtr src, Dir dir, Square dst ) const {
     return res;
 }
 
-PiecePtr Board::EMPTY = std::make_shared<Piece>(PT_EMPTY, SIDE_WHITE);
-
 // initial position FEN notation
 const char *Board::init_pos_fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 0";
 
 
-short Board::test_for_attack(PiecePtr trg) const {
+short Board::test_for_attack(PiecePtr trg, Side side) const {
+    if (side == SIDE_NONE) side = trg->side();
     Square     dst(trg->square());
-    PieceList  attackers(get_side_pieces(OTHER_SIDE(trg->side())));
+    PieceList  attackers(get_side_pieces(OTHER_SIDE(side)));
     short      cnt(0);
     SeekResult res;
     Dir        dir;
@@ -407,7 +468,7 @@ short Board::test_for_attack(PiecePtr trg) const {
             continue;   
         }
         if ( org->moves_pawn() ) {
-            const DirList *dirs = ( trg->side() == SIDE_WHITE ) ? &black_pawn_attack : &white_pawn_attack;
+            const DirList *dirs = ( IS_WHITE(side) ) ? &black_pawn_attack : &white_pawn_attack;
             for ( Dir dir : *dirs ) {
                 if ( org->square() + offs[dir] == dst ) {
                     cnt++;
@@ -417,7 +478,7 @@ short Board::test_for_attack(PiecePtr trg) const {
             // since pawn cannot move like anything else, we're done for this cycle
             continue;
         }
-        if ( org->moves_diag() && (dir = src.diag_bearing(dst)) != NOWHERE ) { 
+        if ( org->moves_diag() && ( dir = src.diag_bearing(dst) ) != NOWHERE ) { 
             res = seek( org, dir, trg );
             if ( res.enc == trg )
                 cnt++;                     
