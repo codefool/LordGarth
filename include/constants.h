@@ -1,6 +1,5 @@
 #pragma once
 
-#include <cstring>
 #include <map>
 #include <memory>
 #include <utility>
@@ -10,26 +9,30 @@ enum Side { SIDE_WHITE=0, SIDE_BLACK };
 
 #define OTHER_SIDE(s) ((s==SIDE_WHITE)?SIDE_BLACK:SIDE_WHITE)
 
-enum Rank { R1=0, R2, R3, R4, R5, R6, R7, R8 };
-enum File { Fa=0, Fb, Fc, Fd, Fe, Ff, Fg, Fh };
+enum Rank : uint8_t { R1=0, R2, R3, R4, R5, R6, R7, R8 };
+enum File : uint8_t { Fa=0, Fb, Fc, Fd, Fe, Ff, Fg, Fh };
 
-enum RnF : unsigned short {
-    a1 = (R1<<3) | Fa, a2 = (R1<<3) | Fb, a3 = (R1<<3) | Fc, a4 = (R1<<3) | Fd, 
-    a5 = (R1<<3) | Fe, a6 = (R1<<3) | Ff, a7 = (R1<<3) | Fg, a8 = (R1<<3) | Fh,
-    b1 = (R2<<3) | Fa, b2 = (R2<<3) | Fb, b3 = (R2<<3) | Fc, b4 = (R2<<3) | Fd, 
-    b5 = (R2<<3) | Fe, b6 = (R2<<3) | Ff, b7 = (R2<<3) | Fg, b8 = (R2<<3) | Fh,
-    c1 = (R3<<3) | Fa, c2 = (R3<<3) | Fb, c3 = (R3<<3) | Fc, c4 = (R3<<3) | Fd, 
-    c5 = (R3<<3) | Fe, c6 = (R3<<3) | Ff, c7 = (R3<<3) | Fg, c8 = (R3<<3) | Fh,
-    d1 = (R4<<3) | Fa, d2 = (R4<<3) | Fb, d3 = (R4<<3) | Fc, d4 = (R4<<3) | Fd, 
-    d5 = (R4<<3) | Fe, d6 = (R4<<3) | Ff, d7 = (R4<<3) | Fg, d8 = (R4<<3) | Fh,
-    e1 = (R5<<3) | Fa, e2 = (R5<<3) | Fb, e3 = (R5<<3) | Fc, e4 = (R5<<3) | Fd, 
-    e5 = (R5<<3) | Fe, e6 = (R5<<3) | Ff, e7 = (R5<<3) | Fg, e8 = (R5<<3) | Fh,
-    f1 = (R6<<3) | Fa, f2 = (R6<<3) | Fb, f3 = (R6<<3) | Fc, f4 = (R6<<3) | Fd, 
-    f5 = (R6<<3) | Fe, f6 = (R6<<3) | Ff, f7 = (R6<<3) | Fg, f8 = (R6<<3) | Fh,
-    g1 = (R7<<3) | Fa, g2 = (R7<<3) | Fb, g3 = (R7<<3) | Fc, g4 = (R7<<3) | Fd, 
-    g5 = (R7<<3) | Fe, g6 = (R7<<3) | Ff, g7 = (R7<<3) | Fg, g8 = (R7<<3) | Fh,
-    h1 = (R8<<3) | Fa, h2 = (R8<<3) | Fb, h3 = (R8<<3) | Fc, h4 = (R8<<3) | Fd, 
-    h5 = (R8<<3) | Fe, h6 = (R8<<3) | Ff, h7 = (R8<<3) | Fg, h8 = (R8<<3) | Fh
+#define RNF(r,f) ((r<<3)|f)
+
+// convenience references so that squares can be refered to by their
+// canonical names.
+enum RnF : uint8_t {
+    a1 = RNF(R1,Fa), a2 = RNF(R1,Fb), a3 = RNF(R1,Fc), a4 = RNF(R1,Fd),
+    a5 = RNF(R1,Fe), a6 = RNF(R1,Ff), a7 = RNF(R1,Fg), a8 = RNF(R1,Fh),
+    b1 = RNF(R2,Fa), b2 = RNF(R2,Fb), b3 = RNF(R2,Fc), b4 = RNF(R2,Fd),
+    b5 = RNF(R2,Fe), b6 = RNF(R2,Ff), b7 = RNF(R2,Fg), b8 = RNF(R2,Fh),
+    c1 = RNF(R3,Fa), c2 = RNF(R3,Fb), c3 = RNF(R3,Fc), c4 = RNF(R3,Fd),
+    c5 = RNF(R3,Fe), c6 = RNF(R3,Ff), c7 = RNF(R3,Fg), c8 = RNF(R3,Fh),
+    d1 = RNF(R4,Fa), d2 = RNF(R4,Fb), d3 = RNF(R4,Fc), d4 = RNF(R4,Fd),
+    d5 = RNF(R4,Fe), d6 = RNF(R4,Ff), d7 = RNF(R4,Fg), d8 = RNF(R4,Fh),
+    e1 = RNF(R5,Fa), e2 = RNF(R5,Fb), e3 = RNF(R5,Fc), e4 = RNF(R5,Fd),
+    e5 = RNF(R5,Fe), e6 = RNF(R5,Ff), e7 = RNF(R5,Fg), e8 = RNF(R5,Fh),
+    f1 = RNF(R6,Fa), f2 = RNF(R6,Fb), f3 = RNF(R6,Fc), f4 = RNF(R6,Fd),
+    f5 = RNF(R6,Fe), f6 = RNF(R6,Ff), f7 = RNF(R6,Fg), f8 = RNF(R6,Fh),
+    g1 = RNF(R7,Fa), g2 = RNF(R7,Fb), g3 = RNF(R7,Fc), g4 = RNF(R7,Fd),
+    g5 = RNF(R7,Fe), g6 = RNF(R7,Ff), g7 = RNF(R7,Fg), g8 = RNF(R7,Fh),
+    h1 = RNF(R8,Fa), h2 = RNF(R8,Fb), h3 = RNF(R8,Fc), h4 = RNF(R8,Fd),
+    h5 = RNF(R8,Fe), h6 = RNF(R8,Ff), h7 = RNF(R8,Fg), h8 = RNF(R8,Fh)
 };
 
 #define PAWN_RANK_BLACK R7
@@ -37,7 +40,7 @@ enum RnF : unsigned short {
 #define EN_PASSANT_RANK_WHITE R5
 #define EN_PASSANT_RANK_BLACK R4
 
-enum PieceType {
+enum PieceType : uint8_t {
     PT_EMPTY = 0,
     PT_KING,
     PT_QUEEN,
@@ -49,7 +52,7 @@ enum PieceType {
 };
 
 // the MoveAction is pbcked to 4 bits, so 0..15
-enum MoveAction {
+enum MoveAction : uint8_t {
 	MV_NONE             = 0,
 	MV_MOVE             = 1,
 	MV_CAPTURE          = 2,
@@ -68,13 +71,13 @@ enum MoveAction {
 	// UNUSED = 15
 };
 
-enum MoveResult { 
+enum MoveResult : uint8_t { 
     MR_NONE=0,
     MR_CHECK,
     MR_DOUBLE_CHECK
 };
 
-enum MoveRuleOrd {
+enum MoveRuleOrd : uint8_t {
     MVRULE_AXES   = 0x01,
     MVRULE_DIAG   = 0x02,
     MVRULE_KNIGHT = 0x04,
@@ -84,7 +87,7 @@ enum MoveRuleOrd {
 
 typedef std::vector<MoveRuleOrd>  MoveRuleOrdList;
 
-enum IllegalMoveReason {
+enum IllegalMoveReason : uint8_t {
     MOVE_INTO_CHECK,            // king cannot move into check
     KING_IN_CHECK,              // move does not take king out of check
     PUTS_KING_IN_CHECK          // move puts king in check
@@ -157,16 +160,16 @@ typedef std::map<Square,PiecePtr> PieceMap;
 union GameInformation {
     uint64_t i;
     struct {
-        uint64_t piece_cnt             :8;
+        uint64_t unused                :28;
         uint64_t castle_white_queenside:1;
         uint64_t castle_white_kingside :1;
         uint64_t castle_black_queenside:1;
         uint64_t castle_black_kingside :1;
         uint64_t on_move               :1;
         uint64_t en_passant            :7;
-        uint64_t unused                :28;
         uint64_t half_move_clock       :8;
         uint64_t full_move_clock       :8;
+        uint64_t piece_cnt             :8;
     } f;
     GameInformation() 
     : i(0) 
@@ -183,8 +186,9 @@ union BoardPacked {
     } f;
 
     BoardPacked() {
-        std::memset(b, 0x00, sizeof(b));
+        f.gi = f.pop = f.lo = f.hi = 0;
     }
+    friend std::ostream& operator<<(std::ostream& os, const BoardPacked& p);
 };
 
 union MovePacked {
@@ -199,6 +203,7 @@ union MovePacked {
     MovePacked() 
     : i(0) 
     {}
+    friend std::ostream& operator<<(std::ostream& os, const MovePacked& p);
 };
 #pragma pack()
 

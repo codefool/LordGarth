@@ -14,8 +14,8 @@ union jig_dw2b {
 union jig_n2b {
     uint8_t b;
     struct {
-        uint8_t lo:4;
         uint8_t hi:4;
+        uint8_t lo:4;
     } n;
     jig_n2b() {
         b = 0;
@@ -42,10 +42,10 @@ BoardPacked Board::pack() const {
     ret.f.pop = ret.f.hi = ret.f.lo = 0;
 
     int      bit(63);
-    int      bytes(0);
     jig_dw2b pieces;
     jig_n2b  n2b;
     bool     hilo(true);
+    uint8_t *bytes = pieces.b;
     for ( short rank(R8); rank >= R1; --rank ) {
         for ( short file(Fa); file <= Fh; ++file, --bit ) {
             Square sq(rank,file);
@@ -56,7 +56,7 @@ BoardPacked Board::pack() const {
                     n2b.n.hi = itr->second->byte();
                 } else {
                     n2b.n.lo = itr->second->byte();
-                    pieces.b[bytes++] = n2b.b;
+                    *bytes++ = n2b.b;
                     n2b.b = 0;
                 }
                 hilo = !hilo;
@@ -64,11 +64,11 @@ BoardPacked Board::pack() const {
         }       
     }
     if ( n2b.b ) {
-        pieces.b[bytes++] = n2b.b;
+        *bytes = n2b.b;
     }
 
-    ret.f.hi = pieces.dw[0];
-    ret.f.lo = pieces.dw[1];
+    ret.f.lo = pieces.dw[0];
+    ret.f.hi = pieces.dw[1];
 
     return ret;
 }
@@ -89,26 +89,47 @@ void Board::unpack(BoardPacked pack) {
     _full_move_cnt          = gi.f.full_move_clock;
 
     _pm.clear();
-    pieces.dw[0] = pack.f.hi;
-    pieces.dw[1] = pack.f.lo;
-    int bytes(0);
+    pieces.dw[0] = pack.f.lo;
+    pieces.dw[1] = pack.f.hi;
     bool hilo(true);
 
-    jig_n2b n2b;
-    n2b.b = pieces.b[0];
-    for( int bit(63); bit >= 0; --bit) {
-        if ( (pack.f.pop & (1ULL << bit)) != 0 ) {
-            uint8_t by;
-            if ( hilo ) {
-                by = n2b.n.hi;
-            } else {
-                by = n2b.n.lo;
-                n2b.b = pieces.b[++bytes];
+    uint64_t map = 1ULL<<63;
+    jig_n2b  n2b;
+    uint8_t *bytes = pieces.b;
+    uint8_t  by;
+
+    n2b.b = *bytes++;
+    for ( short rank(R8); rank >= R1; --rank ) {
+        for ( short file(Fa); file <= Fh; ++file, map >>= 1ULL ) {
+            if ( (pack.f.pop & map) != 0 ) {
+                if ( hilo ) {
+                    by = n2b.n.hi;
+                } else {
+                    by = n2b.n.lo;
+                    n2b.b = *bytes++;
+                }
+                hilo = !hilo;
+                PieceType pt = PieceType(by & 0x07);
+                Side      s   = Side((by & 0x08)?SIDE_BLACK:SIDE_WHITE);
+                set( Square(rank, file), pt, s );
             }
-            hilo = !hilo;
-            PieceType pt = PieceType(by & 0x07);
-            Side      s   = Side((by & 0x08)?SIDE_BLACK:SIDE_WHITE);
-            set( RnF(bit), pt, s );
         }
     }
+}
+
+std::ostream& operator<<(std::ostream& os, const BoardPacked& p) {
+    auto oflags = os.flags(std::ios::hex);
+    auto ofill  = os.fill('0');
+    auto owid   = os.width(16);
+
+    os << p.f.gi << ','
+       << p.f.pop << ','
+       << p.f.hi << ','
+       << p.f.lo;
+    
+    os.flags(oflags);
+    os.fill(ofill);
+    os.width(owid);
+
+    return os;
 }

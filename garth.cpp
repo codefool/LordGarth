@@ -5,54 +5,18 @@
 
 #include "garth.h"
 
-enum OptionOrd {
-    FEN_DIAGRAM,
-    DIAGRAM,
-    INTERACTIVE
-};
-
-struct OptionInfo {
-    OptionOrd   ord;
-    short       expected;
-};
-
-std::map<std::string,OptionInfo> opts{{"-fen",{FEN_DIAGRAM,1}},{"-d",{DIAGRAM,0}},{"-i",{INTERACTIVE,0}}};
-struct {
-    std::string fen;
-
-    bool        diagram;
-    bool        imode;
-
-} options;
-
-
 int main(int argc, char **argv) {
-    for( int argi(1); argi < argc; ++argi ) {
-        char *arg = argv[argi];
-        auto found = opts.find(arg);
-        if ( found != opts.end() ) {
-            if ( argc - argi <= found->second.expected ) {
-                std::cerr << arg << " requires " << found->second.expected << " additonal arg(s) - not found" << std::endl;
-            } else {
-                switch(found->second.ord) {
-                    case FEN_DIAGRAM: options.fen = argv[++argi]; break;
-                    case DIAGRAM:     options.diagram = true; break;
-                    case INTERACTIVE: options.imode   = true; break;
-                }
-            }
-        } else {
-            std::cerr << "Unknown option " << arg << std::endl;
-        }
-    }
-
-    Board b;
+    // Board b;
+    Board b("rnbqkbnr/2pppppp/8/8/4P3/8/PPPP1PPP/RNBQKBN1 b KQkq e3 0 1");
     MoveList ml;
     BoardPacked p = b.pack();
-    // b.get_moves(ml);
+    b.get_moves(ml);
     std::cout << b.diagram() << ' ' << ml.size() << std::endl;
     Board c(false);
     c.unpack(p);
     std::cout << c.diagram() << std::endl;
+    std::cout << p << std::endl;
+    std::cout << ml.back()->pack() << std::endl;
 
     // for (auto m : ml)
     //     std::cout << *m << std::endl;

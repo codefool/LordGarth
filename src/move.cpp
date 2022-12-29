@@ -56,3 +56,20 @@ std::ostream& operator<<(std::ostream& os, const Move& mv) {
 
     return os;
 }
+
+std::ostream& operator<<(std::ostream& os, const MovePacked& p) {
+    auto oflags = os.flags(std::ios::hex);
+    auto ofill  = os.fill('0');
+    auto owid   = os.width(8);
+
+    os << p.f.action << ','
+       << p.f.result << ','
+       << p.f.source << ','
+       << p.f.target;
+
+    os.flags(oflags);
+    os.fill(ofill);
+    os.width(owid);
+
+    return os;
+}
