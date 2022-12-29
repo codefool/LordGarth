@@ -26,11 +26,22 @@ void Board::apply_move(Move& mov, Board& cpy) {
         move_piece( src, Square(mov.org.rank(), Fc));
         move_piece( trg, Square(mov.dst.rank(), Fd));
         break;
-    case MV_PROM_QUEEN:  src->promote(PT_QUEEN);  break; 
-    case MV_PROM_BISHOP: src->promote(PT_BISHOP); break;
-    case MV_PROM_KNIGHT: src->promote(PT_KNIGHT); break;
-    case MV_PROM_ROOK:   src->promote(PT_ROOK);   break;
-        [[fallthrough]];
+    case MV_PROM_QUEEN:  
+        move_piece( src, mov.dst );
+        src->promote(PT_QUEEN);  
+        break; 
+    case MV_PROM_BISHOP: 
+        move_piece( src, mov.dst );
+        src->promote(PT_BISHOP); 
+        break;
+    case MV_PROM_KNIGHT: 
+        move_piece( src, mov.dst );
+        src->promote(PT_KNIGHT); 
+        break;
+    case MV_PROM_ROOK:   
+        move_piece( src, mov.dst );
+        src->promote(PT_ROOK);   
+        break;
     case MV_MOVE:
     case MV_CAPTURE:
         move_piece( src, mov.dst );
@@ -70,6 +81,8 @@ void Board::move_piece(PiecePtr ptr, Square dst) {
     // set the square of the space to dst
     Square org = ptr->square();
     place(ptr, dst);
+    // increment the half-move clock for 50-move rule
+    _half_move_clock++;
 
     // check for key piece moves
     switch( ptr->type() ) {
@@ -106,6 +119,8 @@ void Board::move_piece(PiecePtr ptr, Square dst) {
             ) {
                 set_en_passant( org );
             }
+            // pawn move resets the half-move-clock
+            _half_move_clock = 0;
             break;
     }
 }
