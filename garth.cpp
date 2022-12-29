@@ -15,6 +15,8 @@ int main(int argc, char **argv) {
     Board c(false);
     c.unpack(p);
     std::cout << c.diagram() << std::endl;
+    std::cout << b.fen() << std::endl;
+    std::cout << c.fen() << std::endl;
     std::cout << p << std::endl;
     std::cout << ml.back()->pack() << std::endl;
 

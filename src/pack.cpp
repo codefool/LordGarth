@@ -36,7 +36,7 @@ BoardPacked Board::pack() const {
     gi.f.en_passant             = _en_passant.rnf();
     gi.f.unused                 = 0;
     gi.f.half_move_clock        = _half_move_clock;
-    gi.f.full_move_clock        = _full_move_cnt;
+    gi.f.full_move_cnt          = _full_move_cnt;
 
     ret.f.gi = gi.i;
     ret.f.pop = ret.f.hi = ret.f.lo = 0;
@@ -86,7 +86,7 @@ void Board::unpack(BoardPacked pack) {
     _on_move                = ( gi.f.on_move == 1 ) ? SIDE_BLACK : SIDE_WHITE;
     _en_passant             = Square(RnF(gi.f.en_passant));
     _half_move_clock        = gi.f.half_move_clock;
-    _full_move_cnt          = gi.f.full_move_clock;
+    _full_move_cnt          = gi.f.full_move_cnt;
 
     _pm.clear();
     pieces.dw[0] = pack.f.lo;

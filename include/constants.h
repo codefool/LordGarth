@@ -88,9 +88,11 @@ enum MoveRuleOrd : uint8_t {
 typedef std::vector<MoveRuleOrd>  MoveRuleOrdList;
 
 enum IllegalMoveReason : uint8_t {
-    MOVE_INTO_CHECK,            // king cannot move into check
-    KING_IN_CHECK,              // move does not take king out of check
-    PUTS_KING_IN_CHECK          // move puts king in check
+    IMR_12E_MOVE_INTO_CHECK,     // king cannot move into check
+    IMR_12C_KING_STILL_IN_CHECK, // move does not take king out of check
+    IMR_12E_PUTS_KING_IN_CHECK,  // move puts king in check
+    IMR_8A4_CASTLE_OUT_OF_CHECK, // king cannot castle out of check
+    IMR_12E_SQAURE_UNDER_ATTACK  // king moves over or into square under attack
 };
 
 //                rank  file
@@ -168,7 +170,7 @@ union GameInformation {
         uint64_t on_move               :1;
         uint64_t en_passant            :7;
         uint64_t half_move_clock       :8;
-        uint64_t full_move_clock       :8;
+        uint64_t full_move_cnt         :8;
         uint64_t piece_cnt             :8;
     } f;
     GameInformation() 
