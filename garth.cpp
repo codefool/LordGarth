@@ -4,10 +4,11 @@
 #include <vector>
 
 #include "garth.h"
+#include "libcf.h"
 
 int main(int argc, char **argv) {
-    // Board b;
-    Board b("r3k2r/8/8/8/8/8/8/R3K2R w KQkq - 0 1");
+    Board b;
+    // Board b("r3k2r/8/8/8/8/8/4R3/4K2R w Kkq - 0 1");
     MoveList ml;
     BoardPacked p = b.pack();
     b.get_moves(ml);

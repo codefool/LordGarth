@@ -321,30 +321,30 @@ void Board::check_castle( PiecePtr ptr, MoveList& moves ) const {
     if ( side_can_castle_kingside( ptr->side() ) ) {
         RnF rook = (ptr->is_black()) ? h8 : a8;
         res = seek(ptr,RGT,rook,7);
-        bool is_clear(true);
         if ( res.rc == SEEKRC_FOUND_FRIENDLY && res.trg == res.path.back() ) {
+            bool is_clear(true);
             for ( short idx(0); idx < res.path.size() - 1; ++idx )
                 if ( test_for_attack(at(res.path[idx]), ptr->side()) ) {
                     is_clear = false;
                     break;
                 }
+            if ( is_clear )
+                moves.push_back(Move::create( MV_CASTLE_KINGSIDE, MR_NONE, ptr->square(), rook));
         }
-        if ( is_clear )
-            moves.push_back(Move::create( MV_CASTLE_KINGSIDE, MR_NONE, ptr->square(), rook));
     }
     if ( side_can_castle_queenside( ptr->side() ) ) {
         RnF rook = (ptr->is_black()) ? h1 : a1;
         res = seek(ptr,LFT,rook,7);
-        bool is_clear(true);
         if ( res.rc == SEEKRC_FOUND_FRIENDLY && res.trg == res.path.back() ) {
+            bool is_clear(true);
             for ( short idx(0); idx < res.path.size() - 1; ++idx )
                 if ( test_for_attack(at(res.path[idx]), ptr->side()) ) {
                     is_clear = false;
                     break;
                 }
+            if ( is_clear )
+                moves.push_back(Move::create( MV_CASTLE_QUEENSIDE, MR_NONE, ptr->square(), rook));
         }
-        if ( is_clear )
-            moves.push_back(Move::create( MV_CASTLE_QUEENSIDE, MR_NONE, ptr->square(), rook));
     }
 }
 
